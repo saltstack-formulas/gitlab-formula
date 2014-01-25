@@ -10,3 +10,5 @@ Initial work done for CentOS, heavily inspired by https://github.com/gitlabhq/gi
 I'll try adding support for more systems with time.
 
 I chose to use RVM for ruby because we'd need to compile ruby anyway, and this way is easy (easiest?) to do with salt.
+
+I chose to use PostgreSQL "because".
