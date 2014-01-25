@@ -1,0 +1,11 @@
+include:
+  - gitlab.puias
+  - gitlab.packages
+  - redis
+  - postgresql
+  - gitlab.postgresql
+  - gitlab.user
+  - gitlab.rvm
+  - gitlab.gitlab-shell
+  - gitlab.gitlab
+  - gitlab.nginx

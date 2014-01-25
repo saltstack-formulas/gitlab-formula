@@ -1,0 +1,16 @@
+gitlab:
+  shell_version: v1.8.0
+  gitlab_version: 6-5-stable
+  db_name: gitlabhq_production
+  db_user: git
+  db_pass: MyVerySecretGitLabPassword
+  https: True
+  ssl_key: |
+    -----BEGIN PRIVATE KEY-----
+    ABC=
+    -----END PRIVATE KEY-----
+  ssl_cert: |
+    -----BEGIN CERTIFICATE-----
+    ABC=
+    -----END CERTIFICATE-----
+
