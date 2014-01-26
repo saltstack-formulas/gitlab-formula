@@ -10,6 +10,7 @@ gitlab-git:
       - gem: bundler
       - user: git-user
 
+# https://gitlab.com/gitlab-org/gitlab-ce/blob/master/config/gitlab.yml.example
 gitlab-config:
   file.managed:
     - name: /home/git/gitlab/config/gitlab.yml
@@ -22,6 +23,7 @@ gitlab-config:
       - git: gitlab-git
       - user: git-user
 
+# https://gitlab.com/gitlab-org/gitlab-ce/blob/master/config/database.yml.postgresql
 gitlab-db-config:
   file.managed:
     - name: /home/git/gitlab/config/database.yml
@@ -34,10 +36,12 @@ gitlab-db-config:
       - git: gitlab-git
       - user: git-user
 
+# https://gitlab.com/gitlab-org/gitlab-ce/blob/master/config/unicorn.rb.example
 unicorn-config:
   file.managed:
     - name: /home/git/gitlab/config/unicorn.rb
     - source: salt://gitlab/files/gitlab-unicorn.rb
+    - template: jinja
     - user: git
     - group: git
     - mode: 640
@@ -45,6 +49,7 @@ unicorn-config:
       - git: gitlab-git
       - user: git-user
 
+# https://gitlab.com/gitlab-org/gitlab-ce/blob/master/config/initializers/rack_attack.rb.example
 rack_attack-config:
   file.managed:
     - name: /home/git/gitlab/config/initializers/rack_attack.rb
@@ -125,6 +130,7 @@ gitlab-clear-cache:
     - require:
       - cmd: gitlab-recompile-assets
 
+# Needed to be able to update tree via git
 gitlab-stash:
   cmd.wait:
     - user: git
@@ -147,29 +153,41 @@ gitlab-initialize:
       - git: gitlab-git
       - cmd: gitlab-gems
 
-gitlab-service:
+# https://gitlab.com/gitlab-org/gitlab-ce/blob/master/lib/support/init.d/gitlab.default.example
+gitlab-default:
   file.managed:
-    - name: /etc/init.d/gitlab
-    - source: salt://gitlab/files/gitlab-init
+    - name: /etc/default/gitlab
+    - source: salt://gitlab/files/gitlab-default
+    - template: jinja
     - user: root
     - group: root
-    - mode: 755
+    - mode: 644
+
+gitlab-service:
+  file.symlink:
+    - name: /etc/init.d/gitlab
+    - target: /home/git/gitlab/lib/support/init.d/gitlab
+    - require:
+      - git: gitlab-git
   service:
     - name: gitlab
     - running
     - enable: True
     - require:
-      - file: gitlab-service
       - cmd: gitlab-initialize
+      - file: gitlab-default
+      - file: gitlab-service
     - watch:
       - git: gitlab-git
-      - file: gitlab-service
-      - file: gitlab-db-config
-      - file: gitlab-config
-      - file: unicorn-config
-      - file: rack_attack-config
       - cmd: gitlab-clear-cache
+      - file: gitlab-config
+      - file: gitlab-db-config
+      - file: gitlab-default
+      - file: gitlab-service
+      - file: rack_attack-config
+      - file: unicorn-config
 
+# https://gitlab.com/gitlab-org/gitlab-ce/blob/master/lib/support/logrotate/gitlab
 gitlab-logwatch:
   file.managed:
     - name: /etc/logrotate.d/gitlab

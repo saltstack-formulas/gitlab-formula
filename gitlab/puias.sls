@@ -1,4 +1,5 @@
 {% if grains['os_family'] == 'RedHat' %}
+# https://github.com/gitlabhq/gitlab-recipes/tree/master/install/centos
 PUIAS_6_computational:
   pkgrepo.managed:
     - humanname: PUIAS computational Base $releasever - $basearch

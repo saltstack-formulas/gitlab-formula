@@ -19,6 +19,7 @@ nginx:
 
 {%- if salt['pillar.get']('gitlab:https', false) %}
 
+# https://gitlab.com/gitlab-org/gitlab-recipes/blob/master/web-server/nginx/gitlab-ssl
 gitlab-nginx:
   file.managed:
     - name: /etc/nginx/conf.d/gitlab.conf
@@ -48,6 +49,7 @@ nginx-ssl-cert:
 
 {% else %}
 
+# https://gitlab.com/gitlab-org/gitlab-ce/blob/master/lib/support/nginx/gitlab
 gitlab-nginx:
   file.managed:
     - name: /etc/nginx/conf.d/gitlab.conf

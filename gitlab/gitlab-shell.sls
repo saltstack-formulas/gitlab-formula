@@ -9,14 +9,15 @@ gitlab-shell-git:
       - pkg: git
       - gem: bundler
 
+# https://gitlab.com/gitlab-org/gitlab-shell/blob/master/config.yml.example
 gitlab-shell-config:
   file.managed:
     - name: /home/git/gitlab-shell/config.yml
     - source: salt://gitlab/files/gitlab-shell-config.yml
+    - template: jinja
     - user: git
     - group: git
     - mode: 644
-    - template: jinja
     - require:
       - git: gitlab-shell-git
 
