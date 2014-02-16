@@ -1,3 +1,6 @@
+include:
+  - gitlab.ruby
+
 gitlab-git:
   git.latest:
     - name: https://gitlab.com/gitlab-org/gitlab-ce.git
@@ -7,7 +10,8 @@ gitlab-git:
     - require:
       - pkg: gitlab-deps
       - pkg: git
-      - gem: bundler
+      - sls: gitlab.ruby
+      - cmd: gitlab-shell
       - user: git-user
 
 # https://gitlab.com/gitlab-org/gitlab-ce/blob/master/config/gitlab.yml.example
@@ -83,6 +87,19 @@ git-config:
       - git: gitlab-git
 {% endfor %}
 
+gitlab-initialize:
+  cmd.wait:
+    - user: git
+    - cwd: /home/git/gitlab
+    - name: echo yes | bundle exec rake gitlab:setup RAILS_ENV=production
+    - shell: /bin/bash
+    - unless: psql -U {{ salt['pillar.get']('gitlab:db_user') }} {{ salt['pillar.get']('gitlab:db_name') }} -c 'select * from users;'
+    - watch:
+      - git: gitlab-git
+    - require:
+      - cmd: gitlab-gems
+      - postgres_database: gitlab-db
+
 # When code changes, trigger upgrade procedure
 # Based on https://gitlab.com/gitlab-org/gitlab-ce/blob/master/lib/gitlab/upgrader.rb
 gitlab-gems:
@@ -90,31 +107,35 @@ gitlab-gems:
     - user: git
     - cwd: /home/git/gitlab
     - name: bundle install --deployment --without development test mysql aws
+    - shell: /bin/bash
     - watch:
       - git: gitlab-git
     - require:
-      - git: gitlab-git
       - file: gitlab-db-config
       - file: gitlab-config
       - file: unicorn-config
       - file: rack_attack-config
-      - gem: bundler
+      - sls: gitlab.ruby
 
 gitlab-migrate-db:
   cmd.wait:
     - user: git
     - cwd: /home/git/gitlab
     - name: bundle exec rake db:migrate RAILS_ENV=production
+    - shell: /bin/bash
     - watch:
       - git: gitlab-git
     - require:
       - cmd: gitlab-gems
+      - cmd: gitlab-initialize
+      - postgres_database: gitlab-db
 
 gitlab-recompile-assets:
   cmd.wait:
     - user: git
     - cwd: /home/git/gitlab
     - name: bundle exec rake assets:clean assets:precompile RAILS_ENV=production
+    - shell: /bin/bash
     - watch:
       - git: gitlab-git
     - require:
@@ -125,6 +146,7 @@ gitlab-clear-cache:
     - user: git
     - cwd: /home/git/gitlab
     - name: bundle exec rake cache:clear RAILS_ENV=production
+    - shell: /bin/bash
     - watch:
       - git: gitlab-git
     - require:
@@ -140,18 +162,6 @@ gitlab-stash:
       - git: gitlab-git
     - require:
       - cmd: gitlab-clear-cache
-
-gitlab-initialize:
-  cmd.wait:
-    - user: git
-    - cwd: /home/git/gitlab
-    - name: echo yes | bundle exec rake gitlab:setup RAILS_ENV=production
-    - unless: psql -U {{ salt['pillar.get']('gitlab:db_user') }} {{ salt['pillar.get']('gitlab:db_name') }} -c 'select * from users;'
-    - watch:
-      - git: gitlab-git
-    - require:
-      - git: gitlab-git
-      - cmd: gitlab-gems
 
 # https://gitlab.com/gitlab-org/gitlab-ce/blob/master/lib/support/init.d/gitlab.default.example
 gitlab-default:
@@ -175,8 +185,6 @@ gitlab-service:
     - enable: True
     - require:
       - cmd: gitlab-initialize
-      - file: gitlab-default
-      - file: gitlab-service
     - watch:
       - git: gitlab-git
       - cmd: gitlab-clear-cache

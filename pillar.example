@@ -1,9 +1,12 @@
 gitlab:
+  use_rvm: False
+  rvm_ruby: 2.1.0
   shell_version: v1.8.0
   gitlab_version: 6-5-stable
-  db_name: gitlabhq_production
-  db_user: git
-  db_pass: MyVerySecretGitLabPassword
+  db_engine: postgresql
+  db_name: 'gitlabhq_production'
+  db_user: 'git'
+  db_pass: 'MyVerySecretGitLabPassword'
   gravatar:
     enabled: false
   ldap:
@@ -23,6 +26,23 @@ gitlab:
   shell:
     audit_usernames: false
     log_level: INFO
+    self_signed_cert: false
+    #ca_file: /etc/ssl/cert.pem
+    {% if grains['os_family'] == 'RedHat' %}
+    ca_file: /etc/pki/tls/certs/ca.crt
+    {% elif grains['os_family'] == 'Debian' %}
+    ca_file: /etc/ssl/certs/ca.crt
+    {% endif %}
+    #ca_path: /etc/pki/tls/certs
+    #{% if grains['os_family'] == 'RedHat' %}
+    #ca_path: /etc/pki/tls/certs
+    #{% elif grains['os_family'] == 'Debian' %}
+    #ca_path: /etc/ssl/certs
+    #{% endif %}
+
+  unicorn:
+    worker_processes: 2
+    timeout: 30
   https: True
   ssl_key: |
     -----BEGIN PRIVATE KEY-----
@@ -32,4 +52,3 @@ gitlab:
     -----BEGIN CERTIFICATE-----
     ABC=
     -----END CERTIFICATE-----
-

@@ -1,6 +1,7 @@
 # Copy this lib/support/init.d/gitlab.default.example file to
 # /etc/default/gitlab in order for it to apply to your system.
 
+
 # RAILS_ENV defines the type of installation that is running.
 # Normal values are "production", "test" and "development".
 RAILS_ENV="production"
@@ -12,6 +13,12 @@ app_user="git"
 # app_root defines the folder in which gitlab and it's components are installed.
 # The default is "/home/$app_user/gitlab"
 app_root="/home/$app_user/gitlab"
+
+{% if salt['pillar.get']('gitlab:use_rvm', false) %}
+# Load RVM variables
+. /home/$app_user/.rvm/scripts/rvm
+
+{% endif %}
 
 # pid_path defines a folder in which the gitlab and it's components place their pids.
 # This variable is also used below to define the relevant pids for the gitlab components.

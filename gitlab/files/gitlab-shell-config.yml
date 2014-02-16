@@ -2,14 +2,22 @@
 user: git
 
 # Url to gitlab instance. Used for api calls. Should end with a slash.
+{%- if salt['pillar.get']('gitlab:https', false) %}
+gitlab_url: "https://{{ grains['fqdn'] }}/"
+{% else %}
 gitlab_url: "http://{{ grains['fqdn'] }}/"
+{% endif %}
 
 http_settings:
 #  user: someone
 #  password: somepass
-#  ca_file: /etc/ssl/cert.pem
-#  ca_path: /etc/pki/tls/certs
-  self_signed_cert: false
+{%- if salt['pillar.get']('gitlab:shell:ca_file', false) %}
+  ca_file: {{salt['pillar.get']('gitlab:shell:ca_file') }}
+{% endif %}
+{%- if salt['pillar.get']('gitlab:shell:ca_path', false) %}
+  ca_path: {{ salt['pillar.get']('gitlab:shell:ca_path') }}
+{% endif %}
+  self_signed_cert: {{ salt['pillar.get']('gitlab:shell:self_signed_cert', false) }}
 
 # Repositories path
 # Give the canonicalized absolute pathname,
@@ -33,7 +41,7 @@ redis:
 # log_file: "/home/git/gitlab-shell/gitlab-shell.log"
 
 # Log level. INFO by default
-log_level: {{ salt['pillar.get']('gitlab:shell:log_level', INFO) }}
+log_level: {{ salt['pillar.get']('gitlab:shell:log_level', 'INFO') }}
 
 # Audit usernames.
 # Set to true to see real usernames in the logs instead of key ids, which is easier to follow, but

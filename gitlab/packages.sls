@@ -1,5 +1,6 @@
 gitlab-deps:
   pkg.installed:
+{% if grains['os_family'] == 'RedHat' %}
     - pkgs:
       - autoconf
       - automake
@@ -65,13 +66,44 @@ gitlab-deps:
       - wget
     - require:
       - pkgrepo: PUIAS_6_computational
+{% elif grains['os_family'] == 'Debian' %}
+    - pkgs:
+      - build-essential
+      - checkinstall
+      - curl
+      - libcurl4-openssl-dev
+      - libffi-dev
+      - libgdbm-dev
+      - libicu-dev
+      - libncurses5-dev
+      - libreadline-dev
+      - libssl-dev
+      - libxml2-dev
+      - libxslt1-dev
+      - libyaml-dev
+      - logrotate
+      - openssh-server
+      - python
+      - python-docutils
+      - redis-server
+      - zlib1g-dev
+      {% if salt['pillar.get']('gitlab:db_engine', postgresql) == 'postgresql' %}
+      - libpq-dev
+      {% endif %}
+{% endif %}
 
 git:
-  pkg.latest
+  pkg:
+    - latest
+    {% if grains['os_family'] == 'RedHat' %}
+    - provider: yumpkg
+    {% endif %}
 
+{% if salt['pillar.get']('gitlab:use_rvm', False) %}
 rvm-deps:
   pkg.installed:
     - pkgs:
+    {% if grains['os_family'] == 'RedHat' %}
       - bash
       - bzip2
       - coreutils
@@ -82,3 +114,5 @@ rvm-deps:
       - sed
       - zlib
       - zlib-devel
+    {% endif %}
+{% endif %}

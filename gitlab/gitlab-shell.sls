@@ -1,3 +1,7 @@
+include:
+  - gitlab.user
+  - gitlab.ruby
+
 gitlab-shell-git:
   git.latest:
     - name: https://gitlab.com/gitlab-org/gitlab-shell.git
@@ -7,7 +11,8 @@ gitlab-shell-git:
     - require:
       - pkg: gitlab-deps
       - pkg: git
-      - gem: bundler
+      - sls: gitlab.ruby
+      - file: git-home
 
 # https://gitlab.com/gitlab-org/gitlab-shell/blob/master/config.yml.example
 gitlab-shell-config:
@@ -26,8 +31,8 @@ gitlab-shell:
     - user: git
     - cwd: /home/git/gitlab-shell
     - name: ./bin/install
+    - shell: /bin/bash
     - watch:
       - git: gitlab-shell-git
     - require:
-      - git: gitlab-shell-git
       - file: gitlab-shell-config
