@@ -1,0 +1,6 @@
+[user]
+        name = GitLab
+        email = gitlab@{{ grains['fqdn'] }}
+[core]
+        autocrlf = input
+
