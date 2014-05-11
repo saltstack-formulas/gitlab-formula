@@ -87,7 +87,7 @@ gitlab-deps:
       - python-docutils
       - redis-server
       - zlib1g-dev
-      {% if salt['pillar.get']('gitlab:db_engine', postgresql) == 'postgresql' %}
+      {% if salt['pillar.get']('gitlab:db_engine', 'postgresql') == 'postgresql' %}
       - libpq-dev
       {% endif %}
 {% endif %}
