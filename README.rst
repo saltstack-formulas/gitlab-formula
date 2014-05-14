@@ -20,3 +20,8 @@ I chose to use PostgreSQL "because", planning to make this tunable via pillar.
 I assume you're running gitlab under your node's FQDN, not under another name.
 
 Attempt made to have most settings tunable via pillars.
+
+Formula Dependencies
+====================
+
+* git: https://github.com/saltstack-formulas/git-formula

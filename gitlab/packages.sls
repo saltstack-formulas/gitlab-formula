@@ -1,3 +1,6 @@
+include:
+  - git
+
 gitlab-deps:
   pkg.installed:
 {% if grains['os_family'] == 'RedHat' %}
@@ -91,13 +94,6 @@ gitlab-deps:
       - libpq-dev
       {% endif %}
 {% endif %}
-
-git:
-  pkg:
-    - latest
-    {% if grains['os_family'] == 'RedHat' %}
-    - provider: yumpkg
-    {% endif %}
 
 {% if salt['pillar.get']('gitlab:use_rvm', False) %}
 rvm-deps:
