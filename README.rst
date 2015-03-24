@@ -25,3 +25,14 @@ Formula Dependencies
 ====================
 
 * git: https://github.com/saltstack-formulas/git-formula
+
+Available states
+================
+
+.. contents::
+       :local:
+
+``gitlab.runner``
+-----------------
+
+Install and configure from pillar, gitlab-runner for gitlab-ci. Using https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/doc/gitlab-ci/README.md
