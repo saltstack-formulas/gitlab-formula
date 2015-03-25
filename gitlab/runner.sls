@@ -31,6 +31,7 @@ gitlab-create_init_file:
     - user: "root" 
     - group: "root" 
     - mode: 775 
+    - unless: 'test -e /etc/init/gitlab-runner.conf'
     - require:
       - cmd: gitlab-install_runserver3
 
