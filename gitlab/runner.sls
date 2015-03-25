@@ -14,21 +14,28 @@ gitlab-install_runserver_create_user:
     - home: /home/{{gitlab.runner.username}}
     - groups:
       - gitlab-runner 
+    - require:
+      - pkg: gitlab-install_pkg
 
 gitlab-install_runserver3:
   cmd.run:
     - name: "export CI_SERVER_URL='{{gitlab.runner.url}}'; export REGISTRATION_TOKEN='{{gitlab.runner.token}}'; /opt/gitlab-runner/bin/setup -C /home/{{gitlab.runner.username}};"
     - unless: 'test -e /home/{{gitlab.runner.username}}/config.yml'
+    - require:
+      - user: gitlab-install_runserver_create_user
 
 gitlab-create_init_file:
-  file.managed:
+  file.symlink:
     - name: "/etc/init/gitlab-runner.conf"
-    - source:
-      - "/opt/gitlab-runner/doc/install/upstart/gitlab-runner.conf"
+    - target: "/opt/gitlab-runner/doc/install/upstart/gitlab-runner.conf"
     - user: "root" 
     - group: "root" 
     - mode: 775 
+    - require:
+      - cmd: gitlab-install_runserver3
 
 gitlab-runner:
   service.running:
     - enable: True
+    - require:
+      - file: gitlab-create_init_file
