@@ -45,5 +45,6 @@ gitlab-create_init_file:
 gitlab-runner:
   service.running:
     - enable: True
+    - running: True
     - require:
       - file: gitlab-create_init_file
