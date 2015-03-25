@@ -7,6 +7,13 @@ gitlab-install_pkg:
     - sources:
       - gitlab-runner: {{gitlab.runner.downloadpath}} 
 
+gitlab-create_group:
+  group.present:
+    - name: "gitlab-runner"
+    - system: True
+    - require:
+      - pkg: gitlab-install_pkg
+
 gitlab-install_runserver_create_user:
   user.present:
     - name: {{gitlab.runner.username}}
@@ -15,7 +22,7 @@ gitlab-install_runserver_create_user:
     - groups:
       - gitlab-runner 
     - require:
-      - pkg: gitlab-install_pkg
+      - group: gitlab-create_group 
 
 gitlab-install_runserver3:
   cmd.run:
