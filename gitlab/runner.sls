@@ -32,13 +32,14 @@ gitlab-install_runserver3:
       - user: gitlab-install_runserver_create_user
 
 gitlab-create_init_file:
-  file.symlink:
+  file.copy:
     - name: "/etc/init/gitlab-runner.conf"
-    - target: "/opt/gitlab-runner/doc/install/upstart/gitlab-runner.conf"
+    - source: "/opt/gitlab-runner/doc/install/upstart/gitlab-runner.conf"
     - user: "root" 
     - group: "root" 
     - mode: 775 
     - unless: 'test -e /etc/init/gitlab-runner.conf'
+    - force: True
     - require:
       - cmd: gitlab-install_runserver3
 
