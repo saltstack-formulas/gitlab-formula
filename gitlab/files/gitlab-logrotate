@@ -1,7 +1,9 @@
 # GitLab logrotate settings
 # based on: http://stackoverflow.com/a/4883967
 
-/home/git/gitlab/log/*.log {
+{% set root_dir = salt['pillar.get']('gitlab:lookup:root_dir', '/home/git') %}
+
+{{ root_dir }}/gitlab/log/*.log {
     weekly
     missingok
     rotate 52
@@ -11,7 +13,7 @@
     copytruncate
 }
 
-/home/git/gitlab-shell/gitlab-shell.log {
+{{ root_dir }}/gitlab-shell/gitlab-shell.log {
     weekly
     missingok
     rotate 52

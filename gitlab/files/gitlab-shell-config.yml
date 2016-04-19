@@ -1,6 +1,8 @@
 # GitLab user. git by default
 user: git
 
+{% set root_dir = salt['pillar.get']('gitlab:lookup:root_dir', '/home/git') %}
+
 # Url to gitlab instance. Used for api calls. Should end with a slash.
 {%- if salt['pillar.get']('gitlab:https', false) %}
 gitlab_url: "https://{{ grains['fqdn'] }}/"
@@ -23,10 +25,10 @@ http_settings:
 # Give the canonicalized absolute pathname,
 # REPOS_PATH MUST NOT CONTAIN ANY SYMLINK!!!
 # Check twice that none of the components is a symlink, including "/home".
-repos_path: "/home/git/repositories"
+repos_path: "{{ root_dir }}/repositories"
 
 # File used as authorized_keys for gitlab user
-auth_file: "/home/git/.ssh/authorized_keys"
+auth_file: "{{ root_dir }}/.ssh/authorized_keys"
 
 # Redis settings used for pushing commit notices to gitlab
 redis:
@@ -38,7 +40,7 @@ redis:
 
 # Log file.
 # Default is gitlab-shell.log in the root directory.
-# log_file: "/home/git/gitlab-shell/gitlab-shell.log"
+# log_file: "{{ root_dir }}/gitlab-shell/gitlab-shell.log"
 
 # Log level. INFO by default
 log_level: {{ salt['pillar.get']('gitlab:shell:log_level', 'INFO') }}

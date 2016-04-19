@@ -2,15 +2,17 @@
 # Maintainer: @randx
 # App Version: 5.0
 
+{% set root_dir = salt['pillar.get']('gitlab:lookup:root_dir', '/home/git') %}
+
 upstream gitlab {
-  server unix:/home/git/gitlab/tmp/sockets/gitlab.socket;
+  server unix:{{ root_dir }}/gitlab/tmp/sockets/gitlab.socket;
 }
 
 server {
   listen *:80 default_server;         # e.g., listen 192.168.1.1:80; In most cases *:80 is a good idea
   server_name {{ grains['fqdn'] }};     # e.g., server_name source.example.com;
   server_tokens off;     # don't show the version number, a security best practice
-  root /home/git/gitlab/public;
+  root {{ root_dir }}/gitlab/public;
   
   # Set value of client_max_body_size to at least the value of git.max_size in gitlab.yml
   client_max_body_size 5m;

@@ -8,6 +8,8 @@
 # See http://unicorn.bogomips.org/Unicorn/Configurator.html for complete
 # documentation.
 
+{% set root_dir = salt['pillar.get']('gitlab:lookup:root_dir', '/home/git') %}
+
 # Uncomment and customize the last line to run in a non-root path
 # WARNING: We recommend creating a FQDN to host GitLab in a root path instead of this.
 # Note that four settings need to be changed for this to work.
@@ -32,24 +34,24 @@ worker_processes {{ salt['pillar.get']('gitlab:unicorn:worker_processes', 2) }}
 
 # Help ensure your application will always spawn in the symlinked
 # "current" directory that Capistrano sets up.
-working_directory "/home/git/gitlab" # available in 0.94.0+
+working_directory "{{ root_dir }}/gitlab" # available in 0.94.0+
 
 # listen on both a Unix domain socket and a TCP port,
 # we use a shorter backlog for quicker failover when busy
-listen "/home/git/gitlab/tmp/sockets/gitlab.socket", :backlog => 64
+listen "{{ root_dir }}/gitlab/tmp/sockets/gitlab.socket", :backlog => 64
 listen "127.0.0.1:8080", :tcp_nopush => true
 
 # nuke workers after 30 seconds instead of 60 seconds (the default)
 timeout {{ salt['pillar.get']('gitlab:unicorn:timeout', 30) }}
 
 # feel free to point this anywhere accessible on the filesystem
-pid "/home/git/gitlab/tmp/pids/unicorn.pid"
+pid "{{ root_dir }}/gitlab/tmp/pids/unicorn.pid"
 
 # By default, the Unicorn logger will write to stderr.
 # Additionally, some applications/frameworks log to stderr or stdout,
 # so prevent them from going to /dev/null when daemonized here:
-stderr_path "/home/git/gitlab/log/unicorn.stderr.log"
-stdout_path "/home/git/gitlab/log/unicorn.stdout.log"
+stderr_path "{{ root_dir }}/gitlab/log/unicorn.stderr.log"
+stdout_path "{{ root_dir }}/gitlab/log/unicorn.stdout.log"
 
 # combine Ruby 2.0.0dev or REE with "preload_app true" for memory savings
 # http://rubyenterpriseedition.com/faq.html#adapt_apps_for_cow

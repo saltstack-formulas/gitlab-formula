@@ -1,14 +1,16 @@
+{% set root_dir = salt['pillar.get']('gitlab:lookup:root_dir', '/home/git') %}
+
 git-user:
   user.present:
     - name : git
     - system: True
     - shell: /bin/bash
     - fullname: GitLab
-    - home: /home/git
+    - home: {{ root_dir }}
 
 git-home:
   file.directory:
-    - name: /home/git
+    - name: {{ root_dir }}
     - user: git
     - group: git
     - mode: 750

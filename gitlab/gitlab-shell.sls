@@ -2,11 +2,13 @@ include:
   - gitlab.user
   - gitlab.ruby
 
+{% set root_dir = salt['pillar.get']('gitlab:lookup:root_dir', '/home/git') %}
+
 gitlab-shell-git:
   git.latest:
     - name: https://gitlab.com/gitlab-org/gitlab-shell.git
     - rev: {{ salt['pillar.get']('gitlab:shell_version') }}
-    - target: /home/git/gitlab-shell
+    - target: {{ root_dir }}/gitlab-shell
     - user: git
     - require:
       - pkg: gitlab-deps
@@ -17,7 +19,7 @@ gitlab-shell-git:
 # https://gitlab.com/gitlab-org/gitlab-shell/blob/master/config.yml.example
 gitlab-shell-config:
   file.managed:
-    - name: /home/git/gitlab-shell/config.yml
+    - name: {{ root_dir }}/gitlab-shell/config.yml
     - source: salt://gitlab/files/gitlab-shell-config.yml
     - template: jinja
     - user: git
@@ -29,7 +31,7 @@ gitlab-shell-config:
 gitlab-shell:
   cmd.wait:
     - user: git
-    - cwd: /home/git/gitlab-shell
+    - cwd: {{ root_dir }}/gitlab-shell
     - name: ./bin/install
     - shell: /bin/bash
     - watch:

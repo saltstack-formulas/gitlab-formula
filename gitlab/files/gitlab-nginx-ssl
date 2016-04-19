@@ -18,13 +18,15 @@
 #  2) Enable https "https: true"
 #  3) Update ssl for gravatar "ssl_url: https://secure.gravatar.com/avatar/%{hash}?s=%{size}&d=mm"
 
+{% set root_dir = salt['pillar.get']('gitlab:lookup:root_dir', '/home/git') %}
+
 upstream gitlab {
 
   ## Uncomment if you have set up puma/unicorn to listen on a unix socket (recommended).
-  server unix:/home/git/gitlab/tmp/sockets/gitlab.socket;
+  server unix:{{ root_dir }}/gitlab/tmp/sockets/gitlab.socket;
 
   ## Uncomment if puma/unicorn are configured to listen on a tcp port.
-  ## Check the port number in /home/git/gitlab/config/{puma.rb/unicorn.rb}
+  ## Check the port number in {{ root_dir }}/gitlab/config/{puma.rb/unicorn.rb}
   # server 127.0.0.1:9292;
 }
 
@@ -41,7 +43,7 @@ server {
     listen 443 ssl;
     server_name {{ grains['fqdn'] }};
     server_tokens off;
-    root /home/git/gitlab/public;
+    root {{ root_dir }}/gitlab/public;
 
     ssl on;
     ssl_certificate /etc/nginx/gitlab.crt;

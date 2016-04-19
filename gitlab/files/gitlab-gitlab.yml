@@ -7,6 +7,8 @@
 # 2. Replace gitlab -> host with your domain
 # 3. Replace gitlab -> email_from
 
+{% set root_dir = salt['pillar.get']('gitlab:lookup:root_dir', '/home/git') %}
+
 production: &base
   #
   # 1. GitLab app settings
@@ -180,7 +182,7 @@ production: &base
   # GitLab Satellites
   satellites:
     # Relative paths are relative to Rails.root (default: tmp/repo_satellites/)
-    path: /home/git/gitlab-satellites/
+    path: {{ root_dir }}/gitlab-satellites/
 
   ## Backup settings
   backup:
@@ -189,11 +191,11 @@ production: &base
 
   ## GitLab Shell settings
   gitlab_shell:
-    path: /home/git/gitlab-shell/
+    path: {{ root_dir }}/gitlab-shell/
 
     # REPOS_PATH MUST NOT BE A SYMLINK!!!
-    repos_path: /home/git/repositories/
-    hooks_path: /home/git/gitlab-shell/hooks/
+    repos_path: {{ root_dir }}/repositories/
+    hooks_path: {{ root_dir }}/gitlab-shell/hooks/
 
     # Git over HTTP
     upload_pack: true

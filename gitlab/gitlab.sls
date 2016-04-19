@@ -1,12 +1,14 @@
 include:
   - gitlab.ruby
 
+{% set root_dir = salt['pillar.get']('gitlab:lookup:root_dir', '/home/git') %}
+
 gitlab-git:
   git.latest:
     - name: https://gitlab.com/gitlab-org/gitlab-ce.git
     - rev: {{ salt['pillar.get']('gitlab:gitlab_version') }}
     - user: git
-    - target: /home/git/gitlab
+    - target: {{ root_dir }}/gitlab
     - require:
       - pkg: gitlab-deps
       - pkg: git
@@ -17,7 +19,7 @@ gitlab-git:
 # https://gitlab.com/gitlab-org/gitlab-ce/blob/master/config/gitlab.yml.example
 gitlab-config:
   file.managed:
-    - name: /home/git/gitlab/config/gitlab.yml
+    - name: {{ root_dir }}/gitlab/config/gitlab.yml
     - source: salt://gitlab/files/gitlab-gitlab.yml
     - template: jinja
     - user: git
@@ -30,7 +32,7 @@ gitlab-config:
 # https://gitlab.com/gitlab-org/gitlab-ce/blob/master/config/database.yml.postgresql
 gitlab-db-config:
   file.managed:
-    - name: /home/git/gitlab/config/database.yml
+    - name: {{ root_dir }}/gitlab/config/database.yml
     - source: salt://gitlab/files/gitlab-database.yml
     - template: jinja
     - user: git
@@ -43,7 +45,7 @@ gitlab-db-config:
 # https://gitlab.com/gitlab-org/gitlab-ce/blob/master/config/unicorn.rb.example
 unicorn-config:
   file.managed:
-    - name: /home/git/gitlab/config/unicorn.rb
+    - name: {{ root_dir }}/gitlab/config/unicorn.rb
     - source: salt://gitlab/files/gitlab-unicorn.rb
     - template: jinja
     - user: git
@@ -56,7 +58,7 @@ unicorn-config:
 # https://gitlab.com/gitlab-org/gitlab-ce/blob/master/config/initializers/rack_attack.rb.example
 rack_attack-config:
   file.managed:
-    - name: /home/git/gitlab/config/initializers/rack_attack.rb
+    - name: {{ root_dir }}/gitlab/config/initializers/rack_attack.rb
     - source: salt://gitlab/files/gitlab-rack_attack.rb
     - user: git
     - group: git
@@ -67,7 +69,7 @@ rack_attack-config:
 
 git-config:
   file.managed:
-    - name: /home/git/.gitconfig
+    - name: {{ root_dir }}/.gitconfig
     - source: salt://gitlab/files/gitlab-gitconfig
     - template: jinja
     - user: git
@@ -77,7 +79,7 @@ git-config:
       - user: git-user
 
 {% for dir in ['gitlab-satellites', 'gitlab/tmp/pids', 'gitlab/tmp/sockets', 'gitlab/public/uploads'] %}
-/home/git/{{ dir }}:
+{{ root_dir }}/{{ dir }}:
   file.directory:
     - user: git
     - group: git
@@ -90,7 +92,7 @@ git-config:
 gitlab-initialize:
   cmd.wait:
     - user: git
-    - cwd: /home/git/gitlab
+    - cwd: {{ root_dir }}/gitlab
     - name: echo yes | bundle exec rake gitlab:setup RAILS_ENV=production
     - shell: /bin/bash
     - unless: psql -U {{ salt['pillar.get']('gitlab:db_user') }} {{ salt['pillar.get']('gitlab:db_name') }} -c 'select * from users;'
@@ -105,7 +107,7 @@ gitlab-initialize:
 gitlab-gems:
   cmd.wait:
     - user: git
-    - cwd: /home/git/gitlab
+    - cwd: {{ root_dir }}/gitlab
     - name: bundle install --deployment --without development test mysql aws
     - shell: /bin/bash
     - watch:
@@ -120,7 +122,7 @@ gitlab-gems:
 gitlab-migrate-db:
   cmd.wait:
     - user: git
-    - cwd: /home/git/gitlab
+    - cwd: {{ root_dir }}/gitlab
     - name: bundle exec rake db:migrate RAILS_ENV=production
     - shell: /bin/bash
     - watch:
@@ -133,7 +135,7 @@ gitlab-migrate-db:
 gitlab-recompile-assets:
   cmd.wait:
     - user: git
-    - cwd: /home/git/gitlab
+    - cwd: {{ root_dir }}/gitlab
     - name: bundle exec rake assets:clean assets:precompile RAILS_ENV=production
     - shell: /bin/bash
     - watch:
@@ -144,7 +146,7 @@ gitlab-recompile-assets:
 gitlab-clear-cache:
   cmd.wait:
     - user: git
-    - cwd: /home/git/gitlab
+    - cwd: {{ root_dir }}/gitlab
     - name: bundle exec rake cache:clear RAILS_ENV=production
     - shell: /bin/bash
     - watch:
@@ -156,7 +158,7 @@ gitlab-clear-cache:
 gitlab-stash:
   cmd.wait:
     - user: git
-    - cwd: /home/git/gitlab
+    - cwd: {{ root_dir }}/gitlab
     - name: git stash
     - watch:
       - git: gitlab-git
@@ -176,7 +178,7 @@ gitlab-default:
 gitlab-service:
   file.symlink:
     - name: /etc/init.d/gitlab
-    - target: /home/git/gitlab/lib/support/init.d/gitlab
+    - target: {{ root_dir }}/gitlab/lib/support/init.d/gitlab
     - require:
       - git: gitlab-git
   service:
