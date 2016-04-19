@@ -6,6 +6,9 @@
 {% set nginx_path = '/etc/nginx/conf.d' %}
 {% endif %}
 
+{% set nginx_conf = salt['pillar.get']('backupmanager:lookup:nginx_conf', 'salt://gitlab/files/gitlab-nginx') %}
+{% set nginx_ssl_conf = salt['pillar.get']('backupmanager:lookup:nginx_ssl_conf', 'salt://gitlab/files/gitlab-nginx-ssl') %}
+
 nginx:
   pkg.installed: []
   service.running:
@@ -30,7 +33,7 @@ nginx:
 gitlab-nginx:
   file.managed:
     - name: {{ nginx_path }}/gitlab.conf
-    - source: salt://gitlab/files/gitlab-nginx-ssl
+    - source: {{ nginx_ssl_conf }}
     - template: jinja
     - user: root
     - group: root
@@ -66,7 +69,7 @@ nginx-ssl-cert:
 gitlab-nginx:
   file.managed:
     - name: {{ nginx_path }}/gitlab.conf
-    - source: salt://gitlab/files/gitlab-nginx
+    - source: {{ nginx_conf }}
     - template: jinja
     - user: root
     - group: root
