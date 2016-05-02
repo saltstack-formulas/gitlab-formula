@@ -7,6 +7,9 @@ gitlab:
     sockets_dir: /opt/git/var/sockets
     logs_dir: /opt/git/var/logs
     uploads_dir: /opt/git/var/uploads
+  proxy:
+    enabled: false
+    address: http://ourproxy:port
   use_rvm: False
   rvm_ruby: 2.1.0
   shell_version: v2.7.2

@@ -6,6 +6,7 @@ Modification from original formula :
 * No hardcoded path : possibilty to install gitlab where you want
 * Use of Postgresql formula
 * Original initd script from Gitlab setup
+* Proxy for git.latest / gem
 * Lot of little things...
 
 SaltStack formula to install GitLab

@@ -12,6 +12,19 @@ include:
 {% set active_db = salt['pillar.get']('gitlab:databases:production', 'paf') %}
 {% set db_user, db_user_infos = salt['pillar.get']('postgres:users').items()[0] %}
 
+{% if salt['pillar.get']('gitlab:proxy:enabled', false) %}
+gitlab-git-present:
+  git.present:
+    - name: {{ root_dir }}/gitlab
+    - bare: False
+
+gitlab-git-proxy:
+  git.config:
+    - name: http.proxy
+    - value: {{ salt['pillar.get']('gitlab:proxy:address') }}
+    - repo: {{ root_dir }}/gitlab
+{% endif %}
+
 gitlab-git:
   git.latest:
     - name: https://gitlab.com/gitlab-org/gitlab-ce.git
@@ -24,6 +37,9 @@ gitlab-git:
       - sls: gitlab.ruby
       - cmd: gitlab-shell
       - user: git-user
+      {% if salt['pillar.get']('gitlab:proxy:enabled', false) %}
+      - git: gitlab-git-proxy
+      {% endif %}
 
 # https://gitlab.com/gitlab-org/gitlab-ce/blob/master/config/gitlab.yml.example
 gitlab-config:

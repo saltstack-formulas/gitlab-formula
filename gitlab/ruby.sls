@@ -22,6 +22,9 @@ gitlab-ruby:
     - name: bundler
     - require:
       - pkg: gitlab-ruby
+    {% if salt['pillar.get']('gitlab:proxy:enabled', false) %}
+    - proxy: {{ salt['pillar.get']('gitlab:proxy:address') }}
+    {% endif %}
   {% elif grains['os_family'] == 'RedHat' %}
   pkg.installed:
     - pkgs:
