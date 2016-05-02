@@ -6,8 +6,8 @@
 {% set nginx_path = '/etc/nginx/conf.d' %}
 {% endif %}
 
-{% set nginx_conf = salt['pillar.get']('backupmanager:lookup:nginx_conf', 'salt://gitlab/files/gitlab-nginx') %}
-{% set nginx_ssl_conf = salt['pillar.get']('backupmanager:lookup:nginx_ssl_conf', 'salt://gitlab/files/gitlab-nginx-ssl') %}
+{% set nginx_conf = salt['pillar.get']('gitlab:lookup:nginx_conf', 'salt://gitlab/files/gitlab-nginx') %}
+{% set nginx_ssl_conf = salt['pillar.get']('gitlab:lookup:nginx_ssl_conf', 'salt://gitlab/files/gitlab-nginx-ssl') %}
 
 nginx:
   pkg.installed: []

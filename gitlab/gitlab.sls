@@ -1,7 +1,16 @@
 include:
+  - postgres
   - gitlab.ruby
 
 {% set root_dir = salt['pillar.get']('gitlab:lookup:root_dir', '/home/git') %}
+{% set repositories = salt['pillar.get']('gitlab:lookup:repositories', root_dir ~ '/repositories') %}
+{% set sockets_dir = salt['pillar.get']('gitlab:lookup:sockets_dir', root_dir ~ '/var/sockets') %}
+{% set pids_dir = salt['pillar.get']('gitlab:lookup:pids_dir', root_dir ~ '/var/pids') %}
+{% set logs_dir = salt['pillar.get']('gitlab:lookup:logs_dir', root_dir ~ '/var/logs') %}
+{% set uploads_dir = salt['pillar.get']('gitlab:lookup:uploads_dir', root_dir ~ '/var/uploads') %}
+
+{% set active_db = salt['pillar.get']('gitlab:databases:production', 'paf') %}
+{% set db_user, db_user_infos = salt['pillar.get']('postgres:users').items()[0] %}
 
 gitlab-git:
   git.latest:
@@ -78,37 +87,38 @@ git-config:
     - require:
       - user: git-user
 
-{% for dir in ['gitlab-satellites', 'gitlab/tmp/pids', 'gitlab/tmp/sockets', 'gitlab/public/uploads'] %}
-{{ root_dir }}/{{ dir }}:
+git-var-mkdir:
   file.directory:
+    - name: {{ root_dir }}/var
     - user: git
     - group: git
     - mode: 750
-    - require:
-      - user: git-user
-      - git: gitlab-git
+
+# pids_dir
+{% for dir in [ sockets_dir, logs_dir ] %}
+git-{{ dir }}-mkdir:
+  file.directory:
+    - name: {{ dir }}
+    - user: git
+    - group: git
+    - mode: 750
 {% endfor %}
 
-gitlab-initialize:
-  cmd.wait:
-    - user: git
-    - cwd: {{ root_dir }}/gitlab
-    - name: echo yes | bundle exec rake gitlab:setup RAILS_ENV=production
-    - shell: /bin/bash
-    - unless: psql -U {{ salt['pillar.get']('gitlab:db_user') }} {{ salt['pillar.get']('gitlab:db_name') }} -c 'select * from users;'
-    - watch:
-      - git: gitlab-git
-    - require:
-      - cmd: gitlab-gems
-      - postgres_database: gitlab-db
+# Hardcoded in gitlab, so, we have to create symlink
+gitlab-pids_dir-symlink:
+  file.symlink:
+    - name: {{ pids_dir }}
+    - target: {{ root_dir }}/gitlab/tmp/pids
+  require:
+    - file: gitlab-config
 
 # When code changes, trigger upgrade procedure
 # Based on https://gitlab.com/gitlab-org/gitlab-ce/blob/master/lib/gitlab/upgrader.rb
 gitlab-gems:
-  cmd.wait:
+  cmd.run:
     - user: git
     - cwd: {{ root_dir }}/gitlab
-    - name: bundle install --deployment --without development test mysql aws
+    - name: bundle install --deployment --without development test mysql aws kerberos
     - shell: /bin/bash
     - watch:
       - git: gitlab-git
@@ -118,6 +128,19 @@ gitlab-gems:
       - file: unicorn-config
       - file: rack_attack-config
       - sls: gitlab.ruby
+
+gitlab-initialize:
+  cmd.run:
+    - user: git
+    - cwd: {{ root_dir }}/gitlab
+    - name: force=yes bundle exec rake gitlab:setup RAILS_ENV=production
+    - shell: /bin/bash
+    - unless: PGPASSWORD={{ db_user_infos.password }} psql -h {{ active_db.host }} -U {{ db_user }} {{ active_db.name }} -c 'select * from users;'
+    - watch:
+      - git: gitlab-git
+    - require:
+      - cmd: gitlab-gems
+      - file: gitlab-db-config
 
 gitlab-migrate-db:
   cmd.wait:
@@ -130,7 +153,7 @@ gitlab-migrate-db:
     - require:
       - cmd: gitlab-gems
       - cmd: gitlab-initialize
-      - postgres_database: gitlab-db
+      - file: gitlab-db-config
 
 gitlab-recompile-assets:
   cmd.wait:
@@ -175,33 +198,58 @@ gitlab-default:
     - group: root
     - mode: 644
 
-gitlab-service:
+# https://gitlab.com/gitlab-org/gitlab-ce/blob/master/lib/support/logrotate/gitlab
+gitlab-logwatch:
+  file.managed:
+    - name: /etc/logrotate.d/gitlab
+    - source: salt://gitlab/files/gitlab-logrotate
+    - template: jinja
+    - user: root
+    - group: root
+    - mode: 644
+
+gitlab-respositories-dir:
+  file.directory:
+    - name: {{ repositories }}
+    - user: git
+    - group: git
+    - file_mode: 0660
+    - dir_mode: 2770
+
+gitlab-uploads-dir:
+  file.directory:
+    - name: {{ root_dir }}/gitlab/public/uploads
+    - dir_mode: 0700
+
+gitlab-uploads-symlink:
   file.symlink:
+    - name: {{ uploads_dir }}
+    - target: {{ root_dir }}/gitlab/public/uploads
+    - require:
+      - file: git-var-mkdir
+
+gitlab-service:
+  file.managed:
     - name: /etc/init.d/gitlab
-    - target: {{ root_dir }}/gitlab/lib/support/init.d/gitlab
+    - source: salt://gitlab/files/initd
+    - mode: 0755
+    - template: jinja
     - require:
       - git: gitlab-git
   service:
     - name: gitlab
     - running
     - enable: True
+    - reload: True
     - require:
-      - cmd: gitlab-initialize
+      - file: gitlab-service
+#      - cmd: gitlab-initialize
+      - file: gitlab-pids_dir-symlink      
     - watch:
       - git: gitlab-git
       - cmd: gitlab-clear-cache
       - file: gitlab-config
       - file: gitlab-db-config
       - file: gitlab-default
-      - file: gitlab-service
       - file: rack_attack-config
       - file: unicorn-config
-
-# https://gitlab.com/gitlab-org/gitlab-ce/blob/master/lib/support/logrotate/gitlab
-gitlab-logwatch:
-  file.managed:
-    - name: /etc/logrotate.d/gitlab
-    - source: salt://gitlab/files/gitlab-logrotate
-    - user: root
-    - group: root
-    - mode: 644

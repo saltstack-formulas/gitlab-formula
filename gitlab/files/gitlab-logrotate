@@ -2,8 +2,9 @@
 # based on: http://stackoverflow.com/a/4883967
 
 {% set root_dir = salt['pillar.get']('gitlab:lookup:root_dir', '/home/git') %}
+{% set logs_dir = salt['pillar.get']('gitlab:lookup:logs_dir', root_dir ~ '/var/logs') %}
 
-{{ root_dir }}/gitlab/log/*.log {
+{{ logs_dir }}/*.log {
     weekly
     missingok
     rotate 52
@@ -13,7 +14,7 @@
     copytruncate
 }
 
-{{ root_dir }}/gitlab-shell/gitlab-shell.log {
+{{ logs_dir }}/gitlab-shell.log {
     weekly
     missingok
     rotate 52

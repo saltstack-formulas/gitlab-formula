@@ -1,11 +1,10 @@
-# GITLAB
-# Maintainer: @randx
-# App Version: 5.0
 
 {% set root_dir = salt['pillar.get']('gitlab:lookup:root_dir', '/home/git') %}
+{% set sockets_dir = salt['pillar.get']('gitlab:lookup:sockets_dir', root_dir ~ '/var/sockets') %}
+{% set logs_dir = salt['pillar.get']('gitlab:lookup:logs_dir', root_dir ~ '/var/logs') %}
 
-upstream gitlab {
-  server unix:{{ root_dir }}/gitlab/tmp/sockets/gitlab.socket;
+upstream gitlab-workhorse {
+  server unix:{{ sockets_dir }}/gitlab-workhorse.socket fail_timeout=0;
 }
 
 server {
@@ -18,8 +17,8 @@ server {
   client_max_body_size 5m;
 
   # individual nginx logs for this gitlab vhost
-  access_log  /var/log/nginx/gitlab_access.log;
-  error_log   /var/log/nginx/gitlab_error.log;
+  access_log  {{ logs_dir }}/nginx_access.log;
+  error_log   {{ logs_dir }}/nginx_error.log;
 
   location / {
     # serve static files from defined root folder;.
@@ -39,7 +38,16 @@ server {
     proxy_set_header   X-Real-IP         $remote_addr;
     proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
 
-    proxy_pass http://gitlab;
+    proxy_pass http://gitlab-workhorse;
+  }
+
+  error_page 404 /404.html;
+  error_page 422 /422.html;
+  error_page 500 /500.html;
+  error_page 502 /502.html;
+  location ~ ^/(404|422|500|502)\.html$ {
+    root {{ root_dir }}/gitlab/public;
+    internal;
   }
 }
 

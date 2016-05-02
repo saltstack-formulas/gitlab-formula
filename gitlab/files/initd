@@ -23,8 +23,10 @@
 # An example defaults file can be found in lib/support/init.d/gitlab.default.example
 ###
 
-{%- set root_dir = salt['pillar.get']('gitlab:lookup:root_dir', '/home/git') %}
-{%- set var_dir = salt['pillar.get']('gitlab:lookup:var_dir', '/home/$app_user') -%}
+{% set root_dir = salt['pillar.get']('gitlab:lookup:root_dir', '/home/git') %}
+{% set pids_dir = salt['pillar.get']('gitlab:lookup:pids_dir', root_dir ~ '/var/pids') %}
+{% set sockets_dir = salt['pillar.get']('gitlab:lookup:sockets_dir', root_dir ~ '/var/sockets') %}
+{% set logs_dir = salt['pillar.get']('gitlab:lookup:logs_dir', root_dir ~ '/var/logs') %}
 
 ### Environment variables
 RAILS_ENV="production"
@@ -33,8 +35,8 @@ RAILS_ENV="production"
 # internal /bin/sh variables such as PATH, EDITOR or SHELL.
 app_user="git"
 app_root="{{ root_dir }}/gitlab"
-pid_path="{{ var_dir }}/pids"
-socket_path="{{ var_dir }}/sockets"
+pid_path="{{ pids_dir }}"
+socket_path="{{ sockets_dir }}"
 rails_socket="$socket_path/gitlab.socket"
 web_server_pid_path="$pid_path/unicorn.pid"
 sidekiq_pid_path="$pid_path/sidekiq.pid"
@@ -43,7 +45,7 @@ mail_room_pid_path="$pid_path/mail_room.pid"
 gitlab_workhorse_dir=$(cd {{ root_dir }}/gitlab-workhorse/bin 2> /dev/null && pwd)
 gitlab_workhorse_pid_path="$pid_path/gitlab-workhorse.pid"
 gitlab_workhorse_options="-listenUmask 0 -listenNetwork unix -listenAddr $socket_path/gitlab-workhorse.socket -authBackend http://127.0.0.1:8080 -authSocket $rails_socket -documentRoot $app_root/public"
-gitlab_workhorse_log="{{ var_dir }}/logs/gitlab-workhorse.log"
+gitlab_workhorse_log="{{ logs_dir }}/gitlab-workhorse.log"
 shell_path="/bin/bash"
 
 # Read configuration variable file if it is present

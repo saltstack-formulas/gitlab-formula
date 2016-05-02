@@ -1,6 +1,9 @@
 # Copy this lib/support/init.d/gitlab.default.example file to
 # /etc/default/gitlab in order for it to apply to your system.
 
+{% set root_dir = salt['pillar.get']('gitlab:lookup:root_dir', '/home/git') %}
+{% set pids_dir = salt['pillar.get']('gitlab:lookup:pids_dir', root_dir ~ '/var/pids') %}
+{% set sockets_dir = salt['pillar.get']('gitlab:lookup:sockets_dir', root_dir ~ '/var/sockets') %}
 
 # RAILS_ENV defines the type of installation that is running.
 # Normal values are "production", "test" and "development".
@@ -12,22 +15,21 @@ app_user="git"
 
 # app_root defines the folder in which gitlab and it's components are installed.
 # The default is "/home/$app_user/gitlab"
-app_root="/home/$app_user/gitlab"
+app_root="{{ root_dir }}/gitlab"
 
 {% if salt['pillar.get']('gitlab:use_rvm', false) %}
 # Load RVM variables
 . /home/$app_user/.rvm/scripts/rvm
-
 {% endif %}
 
 # pid_path defines a folder in which the gitlab and it's components place their pids.
 # This variable is also used below to define the relevant pids for the gitlab components.
 # The default is "$app_root/tmp/pids"
-pid_path="$app_root/tmp/pids"
+pid_path="{{ pids_dir }}"
 
 # socket_path defines the folder in which gitlab places the sockets
 #The default is "$app_root/tmp/sockets"
-socket_path="$app_root/tmp/sockets"
+socket_path="{{ sockets_dir }}"
 
 # web_server_pid_path defines the path in which to create the pid file fo the web_server
 # The default is "$pid_path/unicorn.pid"

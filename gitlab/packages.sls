@@ -74,6 +74,8 @@ gitlab-deps:
       - build-essential
       - checkinstall
       - curl
+      - cmake
+      - golang
       - libcurl4-openssl-dev
       - libffi-dev
       - libgdbm-dev
@@ -86,11 +88,14 @@ gitlab-deps:
       - libyaml-dev
       - logrotate
       - openssh-server
+      - nodejs
+      - pkg-config
       - python
       - python-docutils
+      - rake
       - redis-server
       - zlib1g-dev
-      {% if salt['pillar.get']('gitlab:db_engine', 'postgresql') == 'postgresql' %}
+      {% if salt['pillar.get']('gitlab:db:engine', 'postgresql') == 'postgresql' %}
       - libpq-dev
       {% endif %}
 {% endif %}
