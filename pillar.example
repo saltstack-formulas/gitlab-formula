@@ -1,12 +1,33 @@
 gitlab:
+  lookup:
+    root_dir: /opt/git
+    lib_dir: /opt/git/libraries
+    repo_dir: /opt/git/repositories
+    pids_dir: /opt/git/var/pids
+    sockets_dir: /opt/git/var/sockets
+    logs_dir: /opt/git/var/logs
+    uploads_dir: /opt/git/var/uploads
   use_rvm: False
   rvm_ruby: 2.1.0
-  shell_version: v1.8.0
-  gitlab_version: 6-5-stable
-  db_engine: postgresql
-  db_name: 'gitlabhq_production'
-  db_user: 'git'
-  db_pass: 'MyVerySecretGitLabPassword'
+  shell_version: v2.7.2
+  gitlab_version: 8-7-stable
+  workhorse_version: v0.7.1
+  databases:
+    production: &production
+      engine: postgresql
+      name: gitlab
+      pool: 10
+      host: localhost
+    development:
+      engine: postgresql
+      name: gitlab
+    staging:
+      engine: postgresql
+      name: gitlab
+    test:
+      engine: postgresql
+      name: gitlab
+  active_database: *production
   gravatar:
     enabled: false
   ldap:
@@ -43,21 +64,13 @@ gitlab:
   unicorn:
     worker_processes: 2
     timeout: 30
-  https: True
-  ssl_key: |
-    -----BEGIN PRIVATE KEY-----
-    ABC=
-    -----END PRIVATE KEY-----
-  ssl_cert: |
-    -----BEGIN CERTIFICATE-----
-    ABC=
-    -----END CERTIFICATE-----
+  https: false
 
 #runner
-  runner:
-    downloadpath: "https://s3-eu-west-1.amazonaws.com/downloads-packages/ubuntu-14.04/gitlab-runner_5.2.0~omnibus.1-1_amd64.deb"
-    #(default debian wget https://s3-eu-west-1.amazonaws.com/downloads-packages/ubuntu-14.04/gitlab-runner_5.2.0~omnibus.1-1_amd64.deb )
-    username: "gitlab-runner"
-    # default: gitlab-runner
-    url: "url gitlab-ci"
-    token: "token gitlab-ci"
+#  runner:
+#    downloadpath: "https://s3-eu-west-1.amazonaws.com/downloads-packages/ubuntu-14.04/gitlab-runner_5.2.0~omnibus.1-1_amd64.deb"
+#    #(default debian wget https://s3-eu-west-1.amazonaws.com/downloads-packages/ubuntu-14.04/gitlab-runner_5.2.0~omnibus.1-1_amd64.deb )
+#    username: "gitlab-runner"
+#    # default: gitlab-runner
+#    url: "url gitlab-ci"
+#    token: "token gitlab-ci"
