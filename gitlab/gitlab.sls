@@ -186,7 +186,11 @@ gitlab-initialize:
   cmd.run:
     - user: git
     - cwd: {{ gitlab_dir }}
+    {% if salt['pillar.get']('gitlab:proxy:enabled', false) %}
+    - name: HTTP_PROXY={{ salt['pillar.get']('gitlab:proxy:address') }} force=yes bundle exec rake gitlab:setup RAILS_ENV=production
+    {% else %}
     - name: force=yes bundle exec rake gitlab:setup RAILS_ENV=production
+    {% endif %}
     - shell: /bin/bash
     - unless: PGPASSWORD={{ db_user_infos.password }} psql -h {{ active_db.host }} -U {{ db_user }} {{ active_db.name }} -c 'select * from users;'
     - watch:
