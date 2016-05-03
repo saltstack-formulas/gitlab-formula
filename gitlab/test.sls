@@ -19,7 +19,7 @@ gitlab-initialize:
     - shell: /bin/bash
     - unless: PGPASSWORD={{ user_infos.password }} psql -h {{ active_db.host }} -U {{ user }} {{ active_db.name }} -c 'select * from users;'
 #    - watch:
-#      - git: gitlab-git
+#      - git: gitlab-fetcher
 #    - require:
 #      - cmd: gitlab-gems
 #      - file: gitlab-db-config

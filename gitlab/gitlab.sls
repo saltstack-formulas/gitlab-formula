@@ -8,38 +8,55 @@ include:
 {% set pids_dir = salt['pillar.get']('gitlab:lookup:pids_dir', root_dir ~ '/var/pids') %}
 {% set logs_dir = salt['pillar.get']('gitlab:lookup:logs_dir', root_dir ~ '/var/logs') %}
 {% set uploads_dir = salt['pillar.get']('gitlab:lookup:uploads_dir', root_dir ~ '/var/uploads') %}
+{% set lib_dir = salt['pillar.get']('gitlab:lookup:lib_dir', root_dir ~ '/libraries') %}
 
 {% set active_db = salt['pillar.get']('gitlab:databases:production', 'paf') %}
 {% set db_user, db_user_infos = salt['pillar.get']('postgres:users').items()[0] %}
 
-{% if salt['pillar.get']('gitlab:proxy:enabled', false) %}
-gitlab-git-present:
-  git.present:
-    - name: {{ root_dir }}/gitlab
-    - bare: False
-
-gitlab-git-proxy:
-  git.config:
-    - name: http.proxy
-    - value: {{ salt['pillar.get']('gitlab:proxy:address') }}
-    - repo: {{ root_dir }}/gitlab
+{% set gitlab_dir = root_dir ~ "/gitlab" %}
+{% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+    {% set gitlab_dir_content = lib_dir ~ '/gitlab/' ~ salt['pillar.get']('gitlab:archives:sources:gitlab:content') %}
+{% else %}
+    {% set gitlab_dir_content = gitlab_dir %}
 {% endif %}
 
-gitlab-git:
+{% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+gitlab-fetcher:
+  archive.extracted:
+    - name: {{ lib_dir }}/gitlab
+    - source: {{ salt['pillar.get']('gitlab:archives:sources:gitlab:url') }}
+    - source_hash: md5={{ salt['pillar.get']('gitlab:archives:sources:gitlab:md5') }}
+    - archive_format: tar
+    - if_missing: {{ gitlab_dir_content }}
+    - keep: True
+  file.directory:
+    - name: {{ gitlab_dir_content }}
+    - user: git
+    - group: git
+    - recurse:
+      - user
+
+gitlab-lib-symlink:
+  file.symlink:
+    - name: {{ gitlab_dir }}
+    - target: {{ gitlab_dir_content }}
+  require:
+    - file: gitlab-fetcher
+{% else %}
+gitlab-fetcher:
   git.latest:
     - name: https://gitlab.com/gitlab-org/gitlab-ce.git
     - rev: {{ salt['pillar.get']('gitlab:gitlab_version') }}
     - user: git
-    - target: {{ root_dir }}/gitlab
+    - target: {{ gitlab_dir }}
+    - force: True
     - require:
       - pkg: gitlab-deps
       - pkg: git
       - sls: gitlab.ruby
       - cmd: gitlab-shell
       - user: git-user
-      {% if salt['pillar.get']('gitlab:proxy:enabled', false) %}
-      - git: gitlab-git-proxy
-      {% endif %}
+{% endif %}
 
 # https://gitlab.com/gitlab-org/gitlab-ce/blob/master/config/gitlab.yml.example
 gitlab-config:
@@ -51,7 +68,11 @@ gitlab-config:
     - group: git
     - mode: 640
     - require:
-      - git: gitlab-git
+    {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+      - archive: gitlab-fetcher
+    {% else %}
+      - git: gitlab-fetcher
+    {% endif %}
       - user: git-user
 
 # https://gitlab.com/gitlab-org/gitlab-ce/blob/master/config/database.yml.postgresql
@@ -64,7 +85,11 @@ gitlab-db-config:
     - group: git
     - mode: 640
     - require:
-      - git: gitlab-git
+    {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+      - archive: gitlab-fetcher
+    {% else %}
+      - git: gitlab-fetcher
+    {% endif %}
       - user: git-user
 
 # https://gitlab.com/gitlab-org/gitlab-ce/blob/master/config/unicorn.rb.example
@@ -77,7 +102,11 @@ unicorn-config:
     - group: git
     - mode: 640
     - require:
-      - git: gitlab-git
+    {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+      - archive: gitlab-fetcher
+    {% else %}
+      - git: gitlab-fetcher
+    {% endif %}
       - user: git-user
 
 # https://gitlab.com/gitlab-org/gitlab-ce/blob/master/config/initializers/rack_attack.rb.example
@@ -89,7 +118,11 @@ rack_attack-config:
     - group: git
     - mode: 640
     - require:
-      - git: gitlab-git
+    {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+      - archive: gitlab-fetcher
+    {% else %}
+      - git: gitlab-fetcher
+    {% endif %}
       - user: git-user
 
 git-config:
@@ -124,7 +157,7 @@ git-{{ dir }}-mkdir:
 gitlab-pids_dir-symlink:
   file.symlink:
     - name: {{ pids_dir }}
-    - target: {{ root_dir }}/gitlab/tmp/pids
+    - target: {{ gitlab_dir }}/tmp/pids
   require:
     - file: gitlab-config
 
@@ -133,11 +166,15 @@ gitlab-pids_dir-symlink:
 gitlab-gems:
   cmd.run:
     - user: git
-    - cwd: {{ root_dir }}/gitlab
+    - cwd: {{ gitlab_dir }}
     - name: bundle install --deployment --without development test mysql aws kerberos
     - shell: /bin/bash
     - watch:
-      - git: gitlab-git
+    {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+      - archive: gitlab-fetcher
+    {% else %}
+      - git: gitlab-fetcher
+    {% endif %}
     - require:
       - file: gitlab-db-config
       - file: gitlab-config
@@ -148,12 +185,16 @@ gitlab-gems:
 gitlab-initialize:
   cmd.run:
     - user: git
-    - cwd: {{ root_dir }}/gitlab
+    - cwd: {{ gitlab_dir }}
     - name: force=yes bundle exec rake gitlab:setup RAILS_ENV=production
     - shell: /bin/bash
     - unless: PGPASSWORD={{ db_user_infos.password }} psql -h {{ active_db.host }} -U {{ db_user }} {{ active_db.name }} -c 'select * from users;'
     - watch:
-      - git: gitlab-git
+    {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+      - archive: gitlab-fetcher
+    {% else %}
+      - git: gitlab-fetcher
+    {% endif %}
     - require:
       - cmd: gitlab-gems
       - file: gitlab-db-config
@@ -161,11 +202,15 @@ gitlab-initialize:
 gitlab-migrate-db:
   cmd.wait:
     - user: git
-    - cwd: {{ root_dir }}/gitlab
+    - cwd: {{ gitlab_dir }}
     - name: bundle exec rake db:migrate RAILS_ENV=production
     - shell: /bin/bash
     - watch:
-      - git: gitlab-git
+    {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+      - archive: gitlab-fetcher
+    {% else %}
+      - git: gitlab-fetcher
+    {% endif %}
     - require:
       - cmd: gitlab-gems
       - cmd: gitlab-initialize
@@ -174,22 +219,30 @@ gitlab-migrate-db:
 gitlab-recompile-assets:
   cmd.wait:
     - user: git
-    - cwd: {{ root_dir }}/gitlab
+    - cwd: {{ gitlab_dir }}
     - name: bundle exec rake assets:clean assets:precompile RAILS_ENV=production
     - shell: /bin/bash
     - watch:
-      - git: gitlab-git
+    {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+      - archive: gitlab-fetcher
+    {% else %}
+      - git: gitlab-fetcher
+    {% endif %}
     - require:
       - cmd: gitlab-migrate-db
 
 gitlab-clear-cache:
   cmd.wait:
     - user: git
-    - cwd: {{ root_dir }}/gitlab
+    - cwd: {{ gitlab_dir }}
     - name: bundle exec rake cache:clear RAILS_ENV=production
     - shell: /bin/bash
     - watch:
-      - git: gitlab-git
+    {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+      - archive: gitlab-fetcher
+    {% else %}
+      - git: gitlab-fetcher
+    {% endif %}
     - require:
       - cmd: gitlab-recompile-assets
 
@@ -197,10 +250,14 @@ gitlab-clear-cache:
 gitlab-stash:
   cmd.wait:
     - user: git
-    - cwd: {{ root_dir }}/gitlab
+    - cwd: {{ gitlab_dir }}
     - name: git stash
     - watch:
-      - git: gitlab-git
+    {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+      - archive: gitlab-fetcher
+    {% else %}
+      - git: gitlab-fetcher
+    {% endif %}
     - require:
       - cmd: gitlab-clear-cache
 
@@ -234,13 +291,13 @@ gitlab-respositories-dir:
 
 gitlab-uploads-dir:
   file.directory:
-    - name: {{ root_dir }}/gitlab/public/uploads
+    - name: {{ gitlab_dir }}/public/uploads
     - dir_mode: 0700
 
 gitlab-uploads-symlink:
   file.symlink:
     - name: {{ uploads_dir }}
-    - target: {{ root_dir }}/gitlab/public/uploads
+    - target: {{ gitlab_dir }}/public/uploads
     - require:
       - file: git-var-mkdir
 
@@ -251,7 +308,11 @@ gitlab-service:
     - mode: 0755
     - template: jinja
     - require:
-      - git: gitlab-git
+    {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+      - archive: gitlab-fetcher
+    {% else %}
+      - git: gitlab-fetcher
+    {% endif %}
   service:
     - name: gitlab
     - running
@@ -262,7 +323,11 @@ gitlab-service:
 #      - cmd: gitlab-initialize
       - file: gitlab-pids_dir-symlink      
     - watch:
-      - git: gitlab-git
+    {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+      - archive: gitlab-fetcher
+    {% else %}
+      - git: gitlab-fetcher
+    {% endif %}
       - cmd: gitlab-clear-cache
       - file: gitlab-config
       - file: gitlab-db-config
