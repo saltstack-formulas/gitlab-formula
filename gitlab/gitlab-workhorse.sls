@@ -14,7 +14,7 @@ gitlab-workhorse-fetcher:
 {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
   archive.extracted:
     - name: {{ workhorse_dir }}
-    - source: {{ salt['pillar.get']('gitlab:archives:sources:workhorse:url') }}
+    - source: {{ salt['pillar.get']('gitlab:archives:sources:workhorse:source') }}
     - source_hash: md5={{ salt['pillar.get']('gitlab:archives:sources:workhorse:md5') }}
     - archive_format: tar
     - if_missing: {{ workhorse_dir_content }}

@@ -24,7 +24,7 @@ include:
 gitlab-fetcher:
   archive.extracted:
     - name: {{ lib_dir }}/gitlab
-    - source: {{ salt['pillar.get']('gitlab:archives:sources:gitlab:url') }}
+    - source: {{ salt['pillar.get']('gitlab:archives:sources:gitlab:source') }}
     - source_hash: md5={{ salt['pillar.get']('gitlab:archives:sources:gitlab:md5') }}
     - archive_format: tar
     - if_missing: {{ gitlab_dir_content }}

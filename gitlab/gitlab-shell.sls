@@ -17,7 +17,7 @@ gitlab-shell-fetcher:
 {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
   archive.extracted:
     - name: {{ shell_dir }}
-    - source: {{ salt['pillar.get']('gitlab:archives:sources:shell:url') }}
+    - source: {{ salt['pillar.get']('gitlab:archives:sources:shell:source') }}
     - source_hash: md5={{ salt['pillar.get']('gitlab:archives:sources:shell:md5') }}
     - archive_format: tar
     - if_missing: {{ shell_dir_content }}
