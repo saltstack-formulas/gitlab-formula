@@ -13,6 +13,10 @@ gitlab:
   archives:
     enabled: false
     sources:
+      gitlab:
+        url: https://gitlab.com/gitlab-org/gitlab-ce/repository/archive.tar.gz?ref=v8.7.2
+        md5: 0a63803fd87766d034cf3ff4d4133fce
+        content: gitlab-ce-v8.7.2-213974bc9bfca79136db32d47f4854b02e0e7fc2
       workhorse:
         url: https://gitlab.com/gitlab-org/gitlab-workhorse/repository/archive.tar.gz?ref=0.7.2
         md5: c0b266285bf54ed7cef806f25a7e8aa9
@@ -21,10 +25,6 @@ gitlab:
         url: https://gitlab.com/gitlab-org/gitlab-shell/repository/archive.tar.gz?ref=v2.7.2
         md5: 1835e858d9285ac9941eec320e2ecac6
         content: gitlab-shell-v2.7.2-c615ca4650dfb4b17bf073276024f886e52b74a3
-      gitlab:
-        url: https://gitlab.com/gitlab-org/gitlab-ce/repository/archive.tar.gz?ref=v8.7.1
-        md5: 684a0c36cd96bb5766d75400955786b1
-        content: gitlab-ce-v8.7.1-93187cbe200908d649b2fd11dff549da95033211
   use_rvm: False
   rvm_ruby: 2.1.0
   shell_version: v2.7.2
