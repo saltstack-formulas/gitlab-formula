@@ -20,6 +20,12 @@ include:
     {% set gitlab_dir_content = gitlab_dir %}
 {% endif %}
 
+{% if salt['pillar.get']('gitlab:proxy:enabled', false) %}
+    {% set proxy = 'HTTP_PROXY=' ~ salt['pillar.get']('gitlab:proxy:address') %}
+{% else %}
+    {% set proxy = '' %}
+{% endif %}
+
 {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
 gitlab-fetcher:
   archive.extracted:
@@ -167,7 +173,7 @@ gitlab-gems:
   cmd.run:
     - user: git
     - cwd: {{ gitlab_dir }}
-    - name: bundle install --deployment --without development test mysql aws kerberos
+    - name: {{ proxy }} bundle install --deployment --without development test mysql aws kerberos
     - shell: /bin/bash
     - watch:
     {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
@@ -186,11 +192,7 @@ gitlab-initialize:
   cmd.run:
     - user: git
     - cwd: {{ gitlab_dir }}
-    {% if salt['pillar.get']('gitlab:proxy:enabled', false) %}
-    - name: HTTP_PROXY={{ salt['pillar.get']('gitlab:proxy:address') }} force=yes bundle exec rake gitlab:setup RAILS_ENV=production
-    {% else %}
     - name: force=yes bundle exec rake gitlab:setup RAILS_ENV=production
-    {% endif %}
     - shell: /bin/bash
     - unless: PGPASSWORD={{ db_user_infos.password }} psql -h {{ active_db.host }} -U {{ db_user }} {{ active_db.name }} -c 'select * from users;'
     - watch:
