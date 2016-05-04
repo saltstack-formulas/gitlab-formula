@@ -7,6 +7,7 @@ gitlab:
     sockets_dir: /opt/git/var/sockets
     logs_dir: /opt/git/var/logs
     uploads_dir: /opt/git/var/uploads
+  hostname: localhost
   proxy:
     enabled: false
     address: http://ourproxy:port

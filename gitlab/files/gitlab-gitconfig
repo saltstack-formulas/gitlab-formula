@@ -1,6 +1,6 @@
 [user]
         name = GitLab
-        email = gitlab@{{ grains['fqdn'] }}
+        email = gitlab@{{ salt['pillar.get']('gitlab:hostname', grains['fqdn']) }}
 [core]
         autocrlf = input
 

@@ -26,7 +26,7 @@ production: &base
   ## GitLab settings
   gitlab:
     ## Web server settings
-    host: {{ grains['fqdn'] }}
+    host: {{ salt['pillar.get']('gitlab:hostname', grains['fqdn']) }}
 {%- if salt['pillar.get']('gitlab:https', false) %}
     port: 443
     https: true
@@ -51,10 +51,10 @@ production: &base
 
     ## Email settings
     # Email address used in the "From" field in mails sent by GitLab
-    email_from: gitlab@{{ grains['fqdn'] }}
+    email_from: gitlab@{{ salt['pillar.get']('gitlab:hostname', grains['fqdn']) }}
 
     # Email address of your support contact (default: same as email_from)
-    support_email: support@{{ grains['fqdn'] }}
+    support_email: support@{{ salt['pillar.get']('gitlab:hostname', grains['fqdn']) }}
 
     ## User settings
     default_projects_limit: 10

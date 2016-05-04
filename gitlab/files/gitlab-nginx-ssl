@@ -36,7 +36,7 @@ upstream gitlab-workhorse {
 # Replace {{ grains['fqdn'] }} with your FQDN.
 server {
     listen *:80;
-    server_name {{ grains['fqdn'] }};
+    server_name {{ salt['pillar.get']('gitlab:hostname', grains['fqdn']) }};
     server_tokens off;
     root /nowhere; # this doesn't have to be a valid path since we are redirecting, you don't have to change it.
     rewrite ^ https://$server_name$request_uri permanent;
@@ -44,7 +44,7 @@ server {
 
 server {
     listen 443 ssl;
-    server_name {{ grains['fqdn'] }};
+    server_name {{ salt['pillar.get']('gitlab:hostname', grains['fqdn']) }};
     server_tokens off;
     root {{ root_dir }}/gitlab/public;
 
