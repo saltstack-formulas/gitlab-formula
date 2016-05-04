@@ -11,6 +11,13 @@
 {% set lib_dir = salt['pillar.get']('gitlab:lookup:lib_dir', root_dir ~ '/libraries') %}
 {% set repositories = salt['pillar.get']('gitlab:lookup:repositories', root_dir ~ '/repositories') %}
 
+{% set shell_dir = lib_dir ~ "/gitlab-shell" %}
+{% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+    {% set shell_dir_content = shell_dir ~ '/' ~ salt['pillar.get']('gitlab:archives:sources:shell:content') %}
+{% else %}
+    {% set shell_dir_content = shell_dir %}
+{% endif %}
+
 production: &base
   #
   # 1. GitLab app settings
@@ -193,7 +200,7 @@ production: &base
 
   ## GitLab Shell settings
   gitlab_shell:
-    path: {{ lib_dir }}/gitlab-shell/
+    path: {{ shell_dir_content }}
 
     # REPOS_PATH MUST NOT BE A SYMLINK!!!
     repos_path: {{ repositories }}/
