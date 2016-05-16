@@ -4,7 +4,7 @@ gitlab-formula
 Modification from original formula :
 
 * No hardcoded path : possibilty to install gitlab where you want
-* Use of Postgresql formula
+* Use of Postgresql / Nginx formulas
 * Original initd script from Gitlab setup
 * Proxy for git.latest / gem
 * Install package from archive

@@ -9,4 +9,3 @@ include:
   - gitlab.gitlab-shell
   - gitlab.gitlab-workhorse
   - gitlab.gitlab
-  - gitlab.nginx
