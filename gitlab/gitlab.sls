@@ -98,6 +98,21 @@ gitlab-db-config:
     {% endif %}
       - user: git-user
 
+gitlab-db-secrets:
+  file.managed:
+    - name: {{ root_dir }}/gitlab/config/secrets.yml
+    - source: salt://gitlab/files/gitlab-secrets.yml
+    - template: jinja
+    - user: git
+    - group: git
+    - mode: 600
+    - require:
+    {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+      - archive: gitlab-fetcher
+    {% else %}
+      - git: gitlab-fetcher
+    {% endif %}
+
 # https://gitlab.com/gitlab-org/gitlab-ce/blob/master/config/unicorn.rb.example
 unicorn-config:
   file.managed:

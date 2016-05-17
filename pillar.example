@@ -37,6 +37,7 @@ gitlab:
       name: gitlab
       pool: 10
       host: localhost
+      key: YOUR_KEY
     development:
       engine: postgresql
       name: gitlab
