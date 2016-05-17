@@ -204,7 +204,8 @@ production: &base
 
     # REPOS_PATH MUST NOT BE A SYMLINK!!!
     repos_path: {{ repositories }}/
-    hooks_path: {{ repositories }}/hooks/
+
+    hooks_path: {{ shell_dir_content }}/hooks/
 
     # Git over HTTP
     upload_pack: true
