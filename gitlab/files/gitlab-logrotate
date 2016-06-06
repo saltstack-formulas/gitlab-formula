@@ -13,14 +13,3 @@
     notifempty
     copytruncate
 }
-
-{{ logs_dir }}/gitlab-shell.log {
-    weekly
-    missingok
-    rotate 52
-    compress
-    delaycompress
-    notifempty
-    copytruncate
-}
-
