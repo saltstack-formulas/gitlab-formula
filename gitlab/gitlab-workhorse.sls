@@ -50,12 +50,11 @@ gitlab-workhorse-make:
     - cwd: {{ workhorse_dir_content }}
     - name: make install PREFIX={{ root_dir }}/gitlab-workhorse
     - shell: /bin/bash
-    - require:
+    - onchanges:
     {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
       - archive: gitlab-workhorse-fetcher
       - file: gitlab-workhorse-fetcher
     {% else %}
       - git: gitlab-workhorse-fetcher
     {% endif %}
-      - file: {{ root_dir }}/gitlab-workhorse
 
