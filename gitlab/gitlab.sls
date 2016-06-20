@@ -267,6 +267,7 @@ gitlab-clear-cache:
     - require:
       - cmd: gitlab-recompile-assets
 
+{% if not salt['pillar.get']('gitlab:archives:enabled', false) %}
 # Needed to be able to update tree via git
 gitlab-stash:
   cmd.wait:
@@ -274,13 +275,10 @@ gitlab-stash:
     - cwd: {{ gitlab_dir }}
     - name: git stash
     - watch:
-    {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
-      - archive: gitlab-fetcher
-    {% else %}
       - git: gitlab-fetcher
-    {% endif %}
     - require:
       - cmd: gitlab-clear-cache
+{% endif %}
 
 # https://gitlab.com/gitlab-org/gitlab-ce/blob/master/lib/support/init.d/gitlab.default.example
 gitlab-default:
