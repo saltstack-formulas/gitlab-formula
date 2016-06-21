@@ -190,7 +190,7 @@ gitlab-gems:
     - cwd: {{ gitlab_dir }}
     - name: {{ proxy }} bundle install --deployment --without development test mysql aws kerberos
     - shell: /bin/bash
-    - watch:
+    - onchanges:
     {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
       - archive: gitlab-fetcher
     {% else %}
@@ -226,7 +226,7 @@ gitlab-migrate-db:
     - cwd: {{ gitlab_dir }}
     - name: bundle exec rake db:migrate RAILS_ENV=production
     - shell: /bin/bash
-    - watch:
+    - onchanges:
     {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
       - archive: gitlab-fetcher
     {% else %}
@@ -243,7 +243,7 @@ gitlab-recompile-assets:
     - cwd: {{ gitlab_dir }}
     - name: bundle exec rake assets:clean assets:precompile RAILS_ENV=production
     - shell: /bin/bash
-    - watch:
+    - onchanges:
     {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
       - archive: gitlab-fetcher
     {% else %}
@@ -258,7 +258,7 @@ gitlab-clear-cache:
     - cwd: {{ gitlab_dir }}
     - name: bundle exec rake cache:clear RAILS_ENV=production
     - shell: /bin/bash
-    - watch:
+    - onchanges:
     {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
       - archive: gitlab-fetcher
     {% else %}
