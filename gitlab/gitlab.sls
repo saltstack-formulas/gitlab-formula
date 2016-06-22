@@ -221,7 +221,7 @@ gitlab-initialize:
       - file: gitlab-db-config
 
 gitlab-migrate-db:
-  cmd.wait:
+  cmd.run:
     - user: git
     - cwd: {{ gitlab_dir }}
     - name: bundle exec rake db:migrate RAILS_ENV=production
@@ -233,15 +233,14 @@ gitlab-migrate-db:
       - git: gitlab-fetcher
     {% endif %}
     - require:
-      - cmd: gitlab-gems
-      - cmd: gitlab-initialize
       - file: gitlab-db-config
+      - cmd: gitlab-gems
 
-gitlab-recompile-assets:
-  cmd.wait:
+gitlab-recompile-assets-cache:
+  cmd.run:
     - user: git
     - cwd: {{ gitlab_dir }}
-    - name: bundle exec rake assets:clean assets:precompile RAILS_ENV=production
+    - name: bundle exec rake assets:clean assets:precompile cache:clear RAILS_ENV=production
     - shell: /bin/bash
     - onchanges:
     {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
@@ -249,23 +248,6 @@ gitlab-recompile-assets:
     {% else %}
       - git: gitlab-fetcher
     {% endif %}
-    - require:
-      - cmd: gitlab-migrate-db
-
-gitlab-clear-cache:
-  cmd.wait:
-    - user: git
-    - cwd: {{ gitlab_dir }}
-    - name: bundle exec rake cache:clear RAILS_ENV=production
-    - shell: /bin/bash
-    - onchanges:
-    {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
-      - archive: gitlab-fetcher
-    {% else %}
-      - git: gitlab-fetcher
-    {% endif %}
-    - require:
-      - cmd: gitlab-recompile-assets
 
 {% if not salt['pillar.get']('gitlab:archives:enabled', false) %}
 # Needed to be able to update tree via git
@@ -274,10 +256,8 @@ gitlab-stash:
     - user: git
     - cwd: {{ gitlab_dir }}
     - name: git stash
-    - watch:
+    - onchanges:
       - git: gitlab-fetcher
-    - require:
-      - cmd: gitlab-clear-cache
 {% endif %}
 
 # https://gitlab.com/gitlab-org/gitlab-ce/blob/master/lib/support/init.d/gitlab.default.example
@@ -347,7 +327,6 @@ gitlab-service:
     {% else %}
       - git: gitlab-fetcher
     {% endif %}
-      - cmd: gitlab-clear-cache
       - file: gitlab-config
       - file: gitlab-db-config
       - file: gitlab-default
