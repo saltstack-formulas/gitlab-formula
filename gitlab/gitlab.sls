@@ -35,12 +35,16 @@ gitlab-fetcher:
     - archive_format: tar
     - if_missing: {{ gitlab_dir_content }}
     - keep: True
+
+gitlab-chown:
   file.directory:
     - name: {{ gitlab_dir_content }}
     - user: git
     - group: git
     - recurse:
       - user
+    - onchanges:
+      - archive: gitlab-fetcher
 
 gitlab-lib-symlink:
   file.symlink:
