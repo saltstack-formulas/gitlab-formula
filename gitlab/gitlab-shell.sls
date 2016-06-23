@@ -41,6 +41,13 @@ gitlab-shell-fetcher:
       - file: git-home
 {% endif %}
 
+gitlab-shell-symlink:
+  file.symlink:
+    - name: {{ root_dir }}/gitlab-shell
+    - target: {{ shell_dir_content }}
+    - require:
+      - file: git-var-mkdir
+
 # https://gitlab.com/gitlab-org/gitlab-shell/blob/master/config.yml.example
 gitlab-shell-config:
   file.managed:

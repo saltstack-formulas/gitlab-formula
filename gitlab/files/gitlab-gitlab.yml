@@ -200,7 +200,7 @@ production: &base
 
   ## GitLab Shell settings
   gitlab_shell:
-    path: {{ shell_dir_content }}
+    path: {{ root_dir }}/gitlab-shell
 
     # REPOS_PATH MUST NOT BE A SYMLINK!!!
     repos_path: {{ repositories }}/
