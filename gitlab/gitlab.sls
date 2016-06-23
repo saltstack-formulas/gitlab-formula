@@ -292,15 +292,10 @@ gitlab-respositories-dir:
     - file_mode: 0660
     - dir_mode: 2770
 
-gitlab-uploads-dir:
-  file.directory:
-    - name: {{ gitlab_dir }}/public/uploads
-    - dir_mode: 0700
-
 gitlab-uploads-symlink:
   file.symlink:
-    - name: {{ uploads_dir }}
-    - target: {{ gitlab_dir }}/public/uploads
+    - name: {{ gitlab_dir }}/public/uploads
+    - target: {{ uploads_dir }}
     - require:
       - file: git-var-mkdir
 
