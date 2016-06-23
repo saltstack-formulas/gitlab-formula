@@ -13,8 +13,8 @@ include:
     {% set shell_dir_content = shell_dir %}
 {% endif %}
 
-gitlab-shell-fetcher:
 {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+gitlab-shell-fetcher:
   archive.extracted:
     - name: {{ shell_dir }}
     - source: {{ salt['pillar.get']('gitlab:archives:sources:shell:source') }}
@@ -22,12 +22,18 @@ gitlab-shell-fetcher:
     - archive_format: tar
     - if_missing: {{ shell_dir_content }}
     - keep: True
+
+gitlab-shell-chown:
   file.directory:
     - name: {{ shell_dir }}
     - user: git
+    - group: git
     - recurse:
       - user
+    - onchanges:
+      - archive: gitlab-shell-fetcher
 {% else %}
+gitlab-shell-fetcher:
   git.latest:
     - name: https://gitlab.com/gitlab-org/gitlab-shell.git
     - rev: {{ salt['pillar.get']('gitlab:shell_version') }}

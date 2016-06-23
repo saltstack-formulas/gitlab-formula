@@ -10,8 +10,8 @@
     {% set workhorse_dir_content = workhorse_dir %}
 {% endif %}
 
-gitlab-workhorse-fetcher:
 {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+gitlab-workhorse-fetcher:
   archive.extracted:
     - name: {{ workhorse_dir }}
     - source: {{ salt['pillar.get']('gitlab:archives:sources:workhorse:source') }}
@@ -19,12 +19,18 @@ gitlab-workhorse-fetcher:
     - archive_format: tar
     - if_missing: {{ workhorse_dir_content }}
     - keep: True
+
+gitlab-workhorse-chown:
   file.directory:
     - name: {{ workhorse_dir }}
     - user: git
+    - group: git
     - recurse:
       - user
+    - onchanges:
+      - archive: gitlab-workhorse-fetcher
 {% else %}
+gitlab-workhorse-fetcher:
   git.latest:
     - name: https://gitlab.com/gitlab-org/gitlab-workhorse.git
     - rev: {{ salt['pillar.get']('gitlab:workhorse_version') }}
@@ -53,7 +59,6 @@ gitlab-workhorse-make:
     - onchanges:
     {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
       - archive: gitlab-workhorse-fetcher
-      - file: gitlab-workhorse-fetcher
     {% else %}
       - git: gitlab-workhorse-fetcher
     {% endif %}
