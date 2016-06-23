@@ -47,13 +47,6 @@ gitlab-shell-fetcher:
       - file: git-home
 {% endif %}
 
-gitlab-shell-symlink:
-  file.symlink:
-    - name: {{ root_dir }}/gitlab-shell
-    - target: {{ shell_dir_content }}
-    - require:
-      - file: git-var-mkdir
-
 # https://gitlab.com/gitlab-org/gitlab-shell/blob/master/config.yml.example
 gitlab-shell-config:
   file.managed:
@@ -92,3 +85,34 @@ gitlab-shell:
 #    - recurse:
 #      - mode
 
+
+{% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+{#
+ Symlink is not good because Shell run 'File.expand_path' on
+ Shell installation path and convert it to absolute version...
+#}
+
+{#
+gitlab-shell-symlink:
+  file.symlink:
+    - name: {{ root_dir }}/gitlab-shell
+    - target: {{ shell_dir_content }}
+    - require:
+      - file: git-var-mkdir
+#}
+
+gitlab-shell-mkdir:
+  file.directory:
+    - name: {{ root_dir }}/gitlab-shell
+    - user: git
+    - group: git
+
+gitlab-shell-copy:
+  cmd.run:
+    - user: git
+    - cwd: {{ shell_dir_content }}
+    - name: cp -r {{ shell_dir_content }}/* {{ root_dir }}/gitlab-shell/
+    - shell: /bin/bash
+    - onchanges:
+      - archive: gitlab-shell-fetcher
+{% endif %}
