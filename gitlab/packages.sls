@@ -1,5 +1,3 @@
-include:
-  - git
 
 gitlab-deps:
   pkg.installed:
