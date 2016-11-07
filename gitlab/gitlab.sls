@@ -336,3 +336,11 @@ gitlab-service:
       - file: gitlab-default
       - file: rack_attack-config
       - file: unicorn-config
+
+gitlab-secret_file:
+  file.managed:
+    - name: {{ salt['pillar.get']('gitlab:secret_file', '/opt/git/.gitlab_shell_secret') }}
+    - user: git
+    - group: git
+    - mode: 640
+    - contents_pillar: gitlab:secret_key

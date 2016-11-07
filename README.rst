@@ -8,6 +8,7 @@ Modification from original formula :
 * Original initd script from Gitlab setup
 * Proxy for git.latest / gem
 * Install package from archive
+* Configuration keys for secret_key and secret_file (gitlab_shell_secret)
 * Lot of little things...
 
 SaltStack formula to install GitLab

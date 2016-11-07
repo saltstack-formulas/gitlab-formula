@@ -207,6 +207,10 @@ production: &base
 
     hooks_path: {{ shell_dir_content }}/hooks/
 
+    # File that contains the secret key for verifying access for gitlab-shell.
+    # Default is '.gitlab_shell_secret' relative to Rails.root (i.e. root of the GitLab app).
+    secret_file: "{{ salt['pillar.get']('gitlab:secret_file', '/opt/git/.gitlab_shell_secret') }}"
+
     # Git over HTTP
     upload_pack: true
     receive_pack: true

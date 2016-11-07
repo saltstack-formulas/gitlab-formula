@@ -31,6 +31,8 @@ gitlab:
   shell_version: v2.7.2
   gitlab_version: 8-7-stable
   workhorse_version: v0.7.1
+  secret_key: 0123456789abcdef0123456789abcde
+  secret_file: "/opt/git/.gitlab_shell_secret"
   databases:
     production: &production
       engine: postgresql
