@@ -106,6 +106,9 @@ gitlab-shell-mkdir:
     - name: {{ root_dir }}/gitlab-shell
     - user: git
     - group: git
+    - clean: true
+    - onchanges:
+      - archive: gitlab-shell-fetcher
 
 gitlab-shell-copy:
   cmd.run:
