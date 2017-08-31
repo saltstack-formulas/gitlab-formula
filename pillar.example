@@ -37,7 +37,10 @@ gitlab:
       name: gitlab
       pool: 10
       host: localhost
-      key: YOUR_KEY
+      secrets:
+        db_key_base:
+        secret_key_base:
+        otp_key_base:
     development:
       engine: postgresql
       name: gitlab
