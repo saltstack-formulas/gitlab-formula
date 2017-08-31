@@ -245,6 +245,30 @@ gitlab-migrate-db:
       - file: gitlab-db-config
       - cmd: gitlab-gems
 
+gitlab-npm-install:
+  {# npm is stubborn and will not respect proxy settings and git insteadOf #}
+  file.replace:
+    - name: {{ gitlab_dir }}/package.json
+    - pattern: '"jquery-ui": "github:.*#1.11.4",'
+    - repl: '"jquery-ui": "https://github.com/jquery/jquery-ui/archive/1.11.4.tar.gz",'
+  cmd.run:
+    - name: npm install --production
+    - user: git
+    - cwd: {{ gitlab_dir }}
+    {%- if salt['pillar.get']('gitlab:proxy:address') %}
+    - env:
+      - HTTP_PROXY: {{ pillar.gitlab.proxy.address }}
+      - HTTPS_PROXY: {{ pillar.gitlab.proxy.address }}
+    {%- endif %}
+    - onchanges:
+    {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+      - archive: gitlab-fetcher
+    {% else %}
+      - git: gitlab-fetcher
+    {% endif %}
+    - require:
+      - cmd: gitlab-migrate-db
+
 gitlab-recompile-assets-cache:
   cmd.run:
     - user: git
@@ -257,6 +281,8 @@ gitlab-recompile-assets-cache:
     {% else %}
       - git: gitlab-fetcher
     {% endif %}
+    - require:
+      - cmd: gitlab-npm-install
 
 {% if not salt['pillar.get']('gitlab:archives:enabled', false) %}
 # Needed to be able to update tree via git
