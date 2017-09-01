@@ -42,3 +42,8 @@ dir = "{{ gitaly_dir_content }}/ruby"
 [gitlab-shell]
 # The directory where gitlab-shell is installed
 dir = "{{ root_dir }}/gitlab-shell"
+
+# # You can adjust the concurrency of each RPC endpoint
+# [[concurrency]]
+# rpc = "/gitaly.RepositoryService/GarbageCollect"
+# max_per_repo = 1
