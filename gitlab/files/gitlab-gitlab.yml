@@ -185,7 +185,7 @@ production: &base
   ## Gravatar
   ## For Libravatar see: http://doc.gitlab.com/ce/customization/libravatar.html
   gravatar:
-    # gravatar urls: possible placeholders: %{hash} %{size} %{email}
+    # gravatar urls: possible placeholders: %{hash} %{size} %{email} %{username}
     # plain_url: "http://..."     # default: http://www.gravatar.com/avatar/%{hash}?s=%{size}&d=identicon
     # ssl_url:   "https://..."    # default: https://secure.gravatar.com/avatar/%{hash}?s=%{size}&d=identicon
 
@@ -198,7 +198,7 @@ production: &base
       cron: "0 * * * *"
     # Execute scheduled triggers
     pipeline_schedule_worker:
-      cron: "0 */12 * * *"
+      cron: "19 * * * *"
     # Remove expired build artifacts
     expire_build_artifacts_worker:
       cron: "50 * * * *"
@@ -352,6 +352,10 @@ production: &base
     # Uncomment this to automatically sign in with a specific omniauth provider's without
     # showing GitLab's sign-in page (default: show the GitLab sign-in page)
     # auto_sign_in_with_provider: saml
+
+    # Sync user's email address from the specified Omniauth provider every time the user logs
+    # in (default: nil). And consequently make this field read-only.
+    # sync_email_from_provider: cas3
 
     # CAUTION!
     # This allows users to login without having a user account first. Define the allowed providers
