@@ -273,7 +273,7 @@ gitlab-recompile-assets-cache:
   cmd.run:
     - user: git
     - cwd: {{ gitlab_dir }}
-    - name: bundle exec rake assets:clean assets:precompile cache:clear RAILS_ENV=production
+    - name: bundle exec rake gitlab:assets:clean gitlab:assets:compile cache:clear RAILS_ENV=production
     - shell: /bin/bash
     - onchanges:
     {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
