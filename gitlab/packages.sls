@@ -79,6 +79,7 @@ gitlab-deps:
       - libgdbm-dev
       - libicu-dev
       - libncurses5-dev
+      - libre2-dev
       - libreadline-dev
       - libssl-dev
       - libxml2-dev
