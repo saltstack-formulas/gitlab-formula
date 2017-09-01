@@ -281,8 +281,6 @@ gitlab-recompile-assets-cache:
     {% else %}
       - git: gitlab-fetcher
     {% endif %}
-    - require:
-      - cmd: gitlab-npm-install
 
 {% if not salt['pillar.get']('gitlab:archives:enabled', false) %}
 # Needed to be able to update tree via git
