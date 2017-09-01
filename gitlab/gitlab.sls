@@ -245,11 +245,30 @@ gitlab-migrate-db:
       - file: gitlab-db-config
       - cmd: gitlab-gems
 
+gitlab-yarn-install:
+  cmd.run:
+    - name: bundle exec rake yarn:install
+    - user: git
+    - cwd: {{ gitlab_dir }}
+    - env:
+      - RAILS_ENV: production
+      - NODE_ENV: production
+      {%- if salt['pillar.get']('gitlab:proxy:address') %}
+      - HTTP_PROXY: http://{{ pillar.gitlab.proxy.address }}
+      - HTTPS_PROXY: http://{{ pillar.gitlab.proxy.address }}
+      {%- endif %}
+    - onchanges:
+    {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+      - archive: gitlab-fetcher
+    {% else %}
+      - git: gitlab-fetcher
+    {% endif %}
+
 gitlab-recompile-assets-cache:
   cmd.run:
     - user: git
     - cwd: {{ gitlab_dir }}
-    - name: bundle exec rake yarn:install gitlab:assets:clean gitlab:assets:compile cache:clear RAILS_ENV=production NODE_ENV=production
+    - name: bundle exec rake gitlab:assets:clean gitlab:assets:compile cache:clear RAILS_ENV=production NODE_ENV=production
     - shell: /bin/bash
     - onchanges:
     {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
@@ -257,6 +276,8 @@ gitlab-recompile-assets-cache:
     {% else %}
       - git: gitlab-fetcher
     {% endif %}
+    - require:
+      - cmd: gitlab-yarn-install
 
 {% if not salt['pillar.get']('gitlab:archives:enabled', false) %}
 # Needed to be able to update tree via git
