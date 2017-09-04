@@ -81,7 +81,11 @@ gitlab-deps:
       - libncurses5-dev
       - libre2-dev
       - libreadline-dev
+      {%- if (grains['os'] == 'Ubuntu' and grains['os_releaseinfo'][0] >= 17 or grains['os'] == 'Debian' and grains['os_releaseinfo'][0] >= 9) %}
+      - libssl1.0-dev
+      {%- else %}
       - libssl-dev
+      {%- endif %}
       - libxml2-dev
       - libxslt1-dev
       - libyaml-dev
