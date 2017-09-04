@@ -54,7 +54,7 @@ gitlab-workhorse-make:
   cmd.run:
     - user: git
     - cwd: {{ workhorse_dir_content }}
-    - name: make install PREFIX={{ root_dir }}/gitlab-workhorse
+    - name: make install DESTDIR={{ root_dir }}/gitlab-workhorse PREFIX=
     - shell: /bin/bash
     - onchanges:
     {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
