@@ -3,4 +3,5 @@
         email = gitlab@{{ salt['pillar.get']('gitlab:hostname', grains['fqdn']) }}
 [core]
         autocrlf = input
-
+[repack]
+	writeBitmaps = true

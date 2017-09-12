@@ -19,4 +19,31 @@ ruby-scl:
     - require_in:
       - pkg: gitlab-ruby
 {% endif %}
+
+{% elif grains['os_family'] == 'Debian' %}
+{# TODO: Handling of packages should be moved to map.jinja #}
+{# Gitlab 8.17+ requires nodejs-4.3+ but is not available before Debian 9 or Ubuntu 16.10 #}
+gitlab-nodejs-repo-mgmt-pkgs:
+  pkg.installed:
+    - names:
+        - python-apt
+        - apt-transport-https
+    - require_in:
+        - pkgrepo: gitlab-nodejs-repo
+
+gitlab-nodejs-repo:
+  pkgrepo.managed:
+    - name: deb https://deb.nodesource.com/node_4.x {{ grains.oscodename|lower }} main
+    - file: /etc/apt/sources.list.d/nodesource_4.list
+    - key_url: salt://gitlab/files/nodesource.gpg.key
+
+gitlab-nodejs-preference:
+  file.managed:
+    - name: /etc/apt/preferences.d/90_nodesource
+    - contents: |
+        Package: nodejs
+        Pin: release o=Node source,l=Node source
+        Pin-Priority: 901
+    - require_in:
+      - sls: gitlab.packages
 {% endif %}
