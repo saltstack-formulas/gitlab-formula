@@ -79,8 +79,13 @@ gitlab-deps:
       - libgdbm-dev
       - libicu-dev
       - libncurses5-dev
+      - libre2-dev
       - libreadline-dev
+      {%- if (grains['os'] == 'Ubuntu' and grains['osrelease_info'][0] >= 17) or (grains['os'] == 'Debian' and grains['osrelease_info'][0] >= 9) %}
+      - libssl1.0-dev
+      {%- else %}
       - libssl-dev
+      {%- endif %}
       - libxml2-dev
       - libxslt1-dev
       - libyaml-dev
@@ -92,6 +97,7 @@ gitlab-deps:
       - python-docutils
       - rake
       - redis-server
+      - yarn
       - zlib1g-dev
       {% if salt['pillar.get']('gitlab:db:engine', 'postgresql') == 'postgresql' %}
       - libpq-dev

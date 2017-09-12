@@ -30,6 +30,7 @@ gitlab-nodejs-repo-mgmt-pkgs:
         - apt-transport-https
     - require_in:
         - pkgrepo: gitlab-nodejs-repo
+        - pkgrepo: gitlab-yarn-repo
 
 gitlab-nodejs-repo:
   pkgrepo.managed:
@@ -44,6 +45,14 @@ gitlab-nodejs-preference:
         Package: nodejs
         Pin: release o=Node source,l=Node source
         Pin-Priority: 901
+    - require_in:
+      - sls: gitlab.packages
+
+gitlab-yarn-repo:
+  pkgrepo.managed:
+    - name: deb https://dl.yarnpkg.com/debian/ stable main
+    - file: /etc/apt/sources.list.d/yarn.list
+    - key_url: salt://gitlab/files/dl.yarn.com.key
     - require_in:
       - sls: gitlab.packages
 {% endif %}

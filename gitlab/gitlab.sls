@@ -245,35 +245,30 @@ gitlab-migrate-db:
       - file: gitlab-db-config
       - cmd: gitlab-gems
 
-gitlab-npm-install:
-  {# npm is stubborn and will not respect proxy settings and git insteadOf #}
-  file.replace:
-    - name: {{ gitlab_dir }}/package.json
-    - pattern: '"jquery-ui": "github:.*#1.11.4",'
-    - repl: '"jquery-ui": "https://github.com/jquery/jquery-ui/archive/1.11.4.tar.gz",'
+gitlab-yarn-install:
   cmd.run:
-    - name: npm install --production
+    - name: bundle exec rake yarn:install
     - user: git
     - cwd: {{ gitlab_dir }}
-    {%- if salt['pillar.get']('gitlab:proxy:address') %}
     - env:
-      - HTTP_PROXY: {{ pillar.gitlab.proxy.address }}
-      - HTTPS_PROXY: {{ pillar.gitlab.proxy.address }}
-    {%- endif %}
+      - RAILS_ENV: production
+      - NODE_ENV: production
+      {%- if salt['pillar.get']('gitlab:proxy:address') %}
+      - HTTP_PROXY: http://{{ pillar.gitlab.proxy.address }}
+      - HTTPS_PROXY: http://{{ pillar.gitlab.proxy.address }}
+      {%- endif %}
     - onchanges:
     {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
       - archive: gitlab-fetcher
     {% else %}
       - git: gitlab-fetcher
     {% endif %}
-    - require:
-      - cmd: gitlab-migrate-db
 
 gitlab-recompile-assets-cache:
   cmd.run:
     - user: git
     - cwd: {{ gitlab_dir }}
-    - name: bundle exec rake gitlab:assets:clean gitlab:assets:compile cache:clear RAILS_ENV=production
+    - name: bundle exec rake gitlab:assets:clean gitlab:assets:compile cache:clear RAILS_ENV=production NODE_ENV=production
     - shell: /bin/bash
     - onchanges:
     {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
@@ -282,7 +277,7 @@ gitlab-recompile-assets-cache:
       - git: gitlab-fetcher
     {% endif %}
     - require:
-      - cmd: gitlab-npm-install
+      - cmd: gitlab-yarn-install
 
 {% if not salt['pillar.get']('gitlab:archives:enabled', false) %}
 # Needed to be able to update tree via git
