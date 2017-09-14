@@ -20,12 +20,6 @@ include:
     {% set gitlab_dir_content = gitlab_dir %}
 {% endif %}
 
-{% if salt['pillar.get']('gitlab:proxy:enabled', false) %}
-    {% set proxy = 'HTTP_PROXY=' ~ salt['pillar.get']('gitlab:proxy:address') %}
-{% else %}
-    {% set proxy = '' %}
-{% endif %}
-
 {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
 gitlab-fetcher:
   archive.extracted:
@@ -197,8 +191,12 @@ gitlab-gems:
   cmd.run:
     - user: git
     - cwd: {{ gitlab_dir }}
-    - name: {{ proxy }} bundle install --deployment --without development test mysql aws kerberos
-    - shell: /bin/bash
+    - name: bundle install --deployment --without development test mysql aws kerberos
+    - env:
+      {%- if salt['pillar.get']('gitlab:proxy:address') %}
+      - HTTP_PROXY: {{ pillar.gitlab.proxy.address }}
+      - HTTPS_PROXY: {{ pillar.gitlab.proxy.address }}
+      {%- endif %}
     - onchanges:
     {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
       - archive: gitlab-fetcher
@@ -216,8 +214,11 @@ gitlab-initialize:
   cmd.run:
     - user: git
     - cwd: {{ gitlab_dir }}
-    - name: force=yes bundle exec rake gitlab:setup RAILS_ENV=production
+    - name: bundle exec rake gitlab:setup
     - shell: /bin/bash
+    - env:
+      - force: yes
+      - RAILS_ENV: production
     - unless: PGPASSWORD={{ db_user_infos.password }} psql -h {{ active_db.host }} -U {{ db_user }} {{ active_db.name }} -c 'select * from users;'
     - watch:
     {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
@@ -233,8 +234,10 @@ gitlab-migrate-db:
   cmd.run:
     - user: git
     - cwd: {{ gitlab_dir }}
-    - name: bundle exec rake db:migrate RAILS_ENV=production
+    - name: bundle exec rake db:migrate
     - shell: /bin/bash
+    - env:
+      - RAILS_ENV: production
     - onchanges:
     {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
       - archive: gitlab-fetcher
@@ -270,8 +273,11 @@ gitlab-recompile-assets-cache:
   cmd.run:
     - user: git
     - cwd: {{ gitlab_dir }}
-    - name: bundle exec rake gitlab:assets:clean gitlab:assets:compile cache:clear RAILS_ENV=production NODE_ENV=production
+    - name: bundle exec rake gitlab:assets:clean gitlab:assets:compile cache:clear
     - shell: /bin/bash
+    - env:
+      - RAILS_ENV: production
+      - NODE_ENV: production
     - onchanges:
     {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
       - archive: gitlab-fetcher
