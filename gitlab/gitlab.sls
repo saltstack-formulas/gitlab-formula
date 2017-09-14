@@ -254,8 +254,8 @@ gitlab-yarn-install:
       - RAILS_ENV: production
       - NODE_ENV: production
       {%- if salt['pillar.get']('gitlab:proxy:address') %}
-      - HTTP_PROXY: http://{{ pillar.gitlab.proxy.address }}
-      - HTTPS_PROXY: http://{{ pillar.gitlab.proxy.address }}
+      - HTTP_PROXY: {{ pillar.gitlab.proxy.address }}
+      - HTTPS_PROXY: {{ pillar.gitlab.proxy.address }}
       {%- endif %}
     - onchanges:
     {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
