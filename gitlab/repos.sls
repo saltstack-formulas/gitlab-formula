@@ -7,19 +7,6 @@ PUIAS_6_computational:
     - gpgkey: http://springdale.math.ias.edu/data/puias/6/x86_64/os/RPM-GPG-KEY-puias
     - mirrorlist: http://puias.math.ias.edu/data/puias/computational/$releasever/$basearch/mirrorlist
 
-{% if not salt['pillar.get']('gilab:use_rvm', false) %}
-include:
-  - gitlab.ruby
-
-ruby-scl:
-  pkgrepo.managed:
-    - humanname: Ruby 1.9.3 Dynamic Software Collection
-    - gpgcheck: 0
-    - baseurl: http://people.redhat.com/bkabrda/ruby193-rhel-6/
-    - require_in:
-      - pkg: gitlab-ruby
-{% endif %}
-
 {% elif grains['os_family'] == 'Debian' %}
 {# TODO: Handling of packages should be moved to map.jinja #}
 {# Gitlab 8.17+ requires nodejs-4.3+ but is not available before Debian 9 or Ubuntu 16.10 #}
