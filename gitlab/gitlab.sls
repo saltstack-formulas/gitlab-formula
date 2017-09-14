@@ -215,7 +215,6 @@ gitlab-initialize:
     - user: git
     - cwd: {{ gitlab_dir }}
     - name: bundle exec rake gitlab:setup
-    - shell: /bin/bash
     - env:
       - force: yes
       - RAILS_ENV: production
@@ -235,7 +234,6 @@ gitlab-migrate-db:
     - user: git
     - cwd: {{ gitlab_dir }}
     - name: bundle exec rake db:migrate
-    - shell: /bin/bash
     - env:
       - RAILS_ENV: production
     - onchanges:
@@ -274,7 +272,6 @@ gitlab-recompile-assets-cache:
     - user: git
     - cwd: {{ gitlab_dir }}
     - name: bundle exec rake gitlab:assets:clean gitlab:assets:compile cache:clear
-    - shell: /bin/bash
     - env:
       - RAILS_ENV: production
       - NODE_ENV: production
