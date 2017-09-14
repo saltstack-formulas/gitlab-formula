@@ -20,7 +20,7 @@ gitlab-ruby:
       - ruby-dev: ">=2.3"
   gem.installed:
     - name: bundler
-    - version: ">= 1.14, <15.0"
+    - version: ">= 1.14, <1.15"
     - require:
       - pkg: gitlab-ruby
     {% if salt['pillar.get']('gitlab:proxy:enabled', false) %}
