@@ -263,6 +263,8 @@ gitlab-yarn-install:
     {% else %}
       - git: gitlab-fetcher
     {% endif %}
+    - require:
+      - cmd: gitlab-gems
 
 gitlab-recompile-assets-cache:
   cmd.run:
