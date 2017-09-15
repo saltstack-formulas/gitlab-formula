@@ -9,6 +9,32 @@ PUIAS_6_computational:
 
 {% elif grains['os_family'] == 'Debian' %}
 {# TODO: Handling of packages should be moved to map.jinja #}
+{# Gitlab 9.2+ requires golang-1.8+ which requires backports on Debian 9 and Ubuntu 16.04 #}
+{%- set distro = grains.oscodename %}
+gitlab-distro-backports:
+  file.managed:
+    - name: /etc/apt/preferences.d/55_gitlab_req_backports
+    {%- if grains.os == "Ubuntu" %}
+    - contents: |
+        Package: golang
+        Pin: release o=Ubuntu,a={{ distro }}-backports
+        Pin-Priority: 800
+    {%- else %}
+    - contents: |
+        Package: golang
+        Pin: release o=Debian Backports,a={{ distro }}-backports
+        Pin-Priority: 800
+    {%- endif %}
+  pkgrepo.managed:
+    {%- if grains.os == "Ubuntu" %}
+    - name: deb http://archive.ubuntu.com/ubuntu {{ distro }}-backports main
+    {%- else %}
+    - name: deb http://httpredir.debian.org/debian {{ distro }}-backports main
+    {%- endif %}
+    - file: /etc/apt/sources.list.d/gitlab_req_backports.list
+    - require_in:
+      - sls: gitlab.packages
+
 {# Gitlab 8.17+ requires nodejs-4.3+ but is not available before Debian 9 or Ubuntu 16.10 #}
 gitlab-nodejs-repo-mgmt-pkgs:
   pkg.installed:

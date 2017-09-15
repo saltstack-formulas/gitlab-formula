@@ -119,3 +119,11 @@ gitlab-shell-copy:
     - onchanges:
       - archive: gitlab-shell-fetcher
 {% endif %}
+
+gitlab-shell-secret_file:
+  file.managed:
+    - name: {{ salt['pillar.get']('gitlab:shell:secret:path', root_dir ~ '/.gitlab_shell_secret') }}
+    - contents_pillar: gitlab:shell:secret:value
+    - user: git
+    - group: git
+    - mode: 640

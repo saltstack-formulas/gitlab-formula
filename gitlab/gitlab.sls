@@ -246,6 +246,22 @@ gitlab-migrate-db:
       - file: gitlab-db-config
       - cmd: gitlab-gems
 
+gitlab-build-translations:
+  cmd.run:
+    - user: git
+    - cwd: {{ gitlab_dir }}
+    - name: bundle exec rake gettext:pack gettext:po_to_json
+    - env:
+      - RAILS_ENV: production
+    - onchanges:
+    {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+      - archive: gitlab-fetcher
+    {% else %}
+      - git: gitlab-fetcher
+    {% endif %}
+    - require:
+      - cmd: gitlab-gems
+
 gitlab-yarn-install:
   cmd.run:
     - name: bundle exec rake yarn:install
@@ -265,7 +281,7 @@ gitlab-yarn-install:
       - git: gitlab-fetcher
     {% endif %}
     - require:
-      - cmd: gitlab-gems
+      - cmd: gitlab-build-translations
 
 gitlab-recompile-assets-cache:
   cmd.run:
@@ -362,11 +378,3 @@ gitlab-service:
       - file: gitlab-default
       - file: rack_attack-config
       - file: unicorn-config
-
-gitlab-secret_file:
-  file.managed:
-    - name: {{ salt['pillar.get']('gitlab:shell:secret:path', '/opt/git/.gitlab_shell_secret') }}
-    - contents_pillar: gitlab:shell:secret:value
-    - user: git
-    - group: git
-    - mode: 640

@@ -73,7 +73,7 @@ gitlab-deps:
       - checkinstall
       - curl
       - cmake
-      - golang
+      - golang: ">=1.8"
       - libcurl4-openssl-dev
       - libffi-dev
       - libgdbm-dev
@@ -91,13 +91,13 @@ gitlab-deps:
       - libyaml-dev
       - logrotate
       - openssh-server
-      - nodejs
+      - nodejs: ">=4.3"
       - pkg-config
       - python
       - python-docutils
       - rake
       - redis-server
-      - yarn
+      - yarn: ">=0.17"
       - zlib1g-dev
       {% if salt['pillar.get']('gitlab:db:engine', 'postgresql') == 'postgresql' %}
       - libpq-dev
