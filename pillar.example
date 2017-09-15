@@ -27,7 +27,7 @@ gitlab:
         md5: 1835e858d9285ac9941eec320e2ecac6
         content: gitlab-shell-v2.7.2-c615ca4650dfb4b17bf073276024f886e52b74a3
   use_rvm: False
-  rvm_ruby: 2.1.0
+  rvm_ruby: 2.3.3
   shell_version: v2.7.2
   gitlab_version: 8-7-stable
   workhorse_version: v0.7.1

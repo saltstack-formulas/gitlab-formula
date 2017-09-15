@@ -39,7 +39,7 @@ production: &base
 
   ## GitLab settings
   gitlab:
-    ## Web server settings
+    ## Web server settings (note: host is the FQDN, do not include http://)
     host: {{ salt['pillar.get']('gitlab:hostname', grains['fqdn']) }}
 {%- if salt['pillar.get']('gitlab:https', false) %}
     port: 443
@@ -105,7 +105,7 @@ production: &base
       issues: true
       merge_requests: true
       wiki: true
-      snippets: false
+      snippets: true
       builds: true
       container_registry: true
 
@@ -173,8 +173,8 @@ production: &base
     host: example.com
     port: 80 # Set to 443 if you serve the pages with HTTPS
     https: false # Set to true if you serve the pages with HTTPS
-    # external_http: "1.1.1.1:80" # If defined, enables custom domain support in GitLab Pages
-    # external_https: "1.1.1.1:443" # If defined, enables custom domain and certificate support in GitLab Pages
+    # external_http: ["1.1.1.1:80", "[2001::1]:80"] # If defined, enables custom domain support in GitLab Pages
+    # external_https: ["1.1.1.1:443", "[2001::1]:443"] # If defined, enables custom domain and certificate support in GitLab Pages
 
   ## Mattermost
   ## For enabling Add to Mattermost button
@@ -196,6 +196,9 @@ production: &base
     # Flag stuck CI jobs as failed
     stuck_ci_jobs_worker:
       cron: "0 * * * *"
+    # Execute scheduled triggers
+    trigger_schedule_worker:
+      cron: "0 */12 * * *"
     # Remove expired build artifacts
     expire_build_artifacts_worker:
       cron: "50 * * * *"
@@ -459,26 +462,14 @@ production: &base
 
   # Gitaly settings
   gitaly:
-    # The socket_path setting is optional and obsolete. When this is set
-    # GitLab assumes it can reach a Gitaly services via a Unix socket at
-    # this path. When this is commented out GitLab will not use Gitaly.
-    # 
-    # This setting is obsolete because we expect it to be moved under
-    # repositories/storages in GitLab 9.1.
-    #
-    # socket_path: tmp/sockets/private/gitaly.socket
+    # This setting controls whether GitLab uses Gitaly (new component
+    # introduced in 9.0). Eventually Gitaly use will become mandatory and
+    # this option will disappear.
+    enabled: false
 
   #
   # 4. Advanced settings
   # ==========================
-
-  # GitLab Satellites
-  #
-  # Note for maintainers: keep the satellites.path setting until GitLab 9.0 at
-  # least. This setting is fed to 'rm -rf' in
-  # db/migrate/20151023144219_remove_satellites.rb
-  satellites:
-    path: {{ lib_dir }}/gitlab-satellites/
 
   ## Repositories settings
   repositories:
@@ -489,6 +480,7 @@ production: &base
     storages: # You must have at least a `default` storage path.
       default:
         path: {{ repositories }}
+        gitaly_address: unix:{{ root_dir }}/gitlab/tmp/sockets/private/gitaly.socket # TCP connections are supported too (e.g. tcp://host:port)
 
   ## Backup settings
   backup:
