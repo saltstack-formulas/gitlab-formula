@@ -86,6 +86,10 @@ gitlab:
     secret:
       value: 0123456789abcdef0123456789abcde
       path: "/opt/git/.gitlab_shell_secret"
+  workhorse
+    secret:
+      value: 0123456789abcdef0123456789zyxwvu
+      path: "/opt/git/.gitlab_workhorse_secret"
 
   unicorn:
     worker_processes: 2

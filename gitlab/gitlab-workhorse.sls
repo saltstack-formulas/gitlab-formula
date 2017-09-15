@@ -63,3 +63,10 @@ gitlab-workhorse-make:
       - git: gitlab-workhorse-fetcher
     {% endif %}
 
+gitlab-workhorse-secret_file:
+  file.managed:
+    - name: {{ salt['pillar.get']('gitlab:shell:workhorse:path', root_dir ~ '/.gitlab_workhorse_secret') }}
+    - contents_pillar: gitlab:workhorse:secret:value
+    - user: git
+    - group: git
+    - mode: 640
