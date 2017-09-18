@@ -63,6 +63,18 @@ gitlab-shell-config:
       - git: gitlab-shell-fetcher
     {% endif %}
 
+gitlab-shell-compile:
+  cmd.run:
+    - user: git
+    - cwd: {{ shell_dir_content }}
+    - name: ./bin/compile
+    - onchanges:
+    {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
+      - archive: gitlab-shell-fetcher
+    {% else %}
+      - git: gitlab-shell-fetcher
+    {% endif %}
+
 gitlab-shell:
   cmd.wait:
     - user: git
@@ -77,6 +89,7 @@ gitlab-shell:
     {% endif %}
     - require:
       - file: gitlab-shell-config
+      - cmd: gitlab-shell-compile
 
 #gitlab-shell-chmod-bin:
 #  file.directory:
