@@ -18,12 +18,12 @@ gitlab-distro-backports:
     - contents: |
         Package: golang
         Pin: release o=Ubuntu,a=artful
-        Pin-Priority: 800
+        Pin-Priority: 901
     {%- else %}
     - contents: |
         Package: golang
         Pin: release o=Debian Backports,a={{ distro }}-backports
-        Pin-Priority: 800
+        Pin-Priority: 901
     {%- endif %}
   pkgrepo.managed:
     {%- if grains.os == "Ubuntu" and grains.osrelease_info[0] < 17 %}
