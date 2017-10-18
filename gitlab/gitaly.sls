@@ -44,18 +44,6 @@ gitaly-fetcher:
       - file: git-home
 {%- endif %}
 
-# https://gitlab.com/gitlab-org/gitaly/blob/master/config.toml.example
-gitaly-config:
-  file.managed:
-    - name: {{ gitaly_dir_content }}/config.toml
-    - source: salt://gitlab/files/gitaly-config.toml
-    - template: jinja
-    - user: git
-    - group: git
-    - mode: 644
-    - require:
-      - gitaly-fetcher
-
 gitaly-private-sockets-dir:
   file.directory:
     - name: {{ sockets_dir }}/private
@@ -79,3 +67,18 @@ gitaly-make:
       - gitaly-fetcher
     - require:
       - file: gitaly-bin-dir
+
+# https://gitlab.com/gitlab-org/gitaly/blob/master/config.toml.example
+# gitaly looks for configuration in the same directory it is running from
+gitaly-config:
+  file.managed:
+    - name: {{ root_dir }}/gitaly/bin/config.toml
+    - source: salt://gitlab/files/gitaly-config.toml
+    - template: jinja
+    - user: git
+    - group: git
+    - mode: 644
+    - require:
+      - gitaly-fetcher
+      - file: gitaly-bin-dir
+      - cmd: gitaly-make
