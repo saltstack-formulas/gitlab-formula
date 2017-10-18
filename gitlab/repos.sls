@@ -9,15 +9,15 @@ PUIAS_6_computational:
 
 {% elif grains['os_family'] == 'Debian' %}
 {# TODO: Handling of packages should be moved to map.jinja #}
-{# Gitlab 9.2+ requires golang-1.8+ which requires backports on Debian 9 and Ubuntu 16.04 #}
+{# Gitlab 9.2+ requires golang-1.8+ which requires backports on Debian 9 and Artful repositories on Ubuntu #}
 {%- set distro = grains.oscodename %}
 gitlab-distro-backports:
   file.managed:
     - name: /etc/apt/preferences.d/55_gitlab_req_backports
-    {%- if grains.os == "Ubuntu" %}
+    {%- if grains.os == "Ubuntu" and grains.osrelease_info[0] < 17 %}
     - contents: |
         Package: golang
-        Pin: release o=Ubuntu,a={{ distro }}-backports
+        Pin: release o=Ubuntu,a=artful
         Pin-Priority: 800
     {%- else %}
     - contents: |
@@ -26,8 +26,8 @@ gitlab-distro-backports:
         Pin-Priority: 800
     {%- endif %}
   pkgrepo.managed:
-    {%- if grains.os == "Ubuntu" %}
-    - name: deb http://archive.ubuntu.com/ubuntu {{ distro }}-backports main
+    {%- if grains.os == "Ubuntu" and grains.osrelease_info[0] < 17 %}
+    - name: deb http://archive.ubuntu.com/ubuntu artful main
     {%- else %}
     - name: deb http://httpredir.debian.org/debian {{ distro }}-backports main
     {%- endif %}

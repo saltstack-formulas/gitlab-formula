@@ -1,3 +1,14 @@
+{%- if grains.os_family == 'Debian' %}
+# aptpkg does not deal with >= versions
+gitlab-golang-deps:
+  pkg.installed:
+    - pkgs:
+      - golang
+      - golang-1.8
+    {%- if grains.os == "Ubuntu" and grains.osrelease_info[0] < 17 %}
+    - fromrepo: artful
+    {%- endif %}
+{%- endif %}
 
 gitlab-deps:
   pkg.installed:
@@ -73,7 +84,6 @@ gitlab-deps:
       - checkinstall
       - curl
       - cmake
-      - golang: ">=1.8"
       - libcurl4-openssl-dev
       - libffi-dev
       - libgdbm-dev
@@ -102,6 +112,8 @@ gitlab-deps:
       {% if salt['pillar.get']('gitlab:db:engine', 'postgresql') == 'postgresql' %}
       - libpq-dev
       {% endif %}
+    - require:
+      - pkg: gitlab-golang-deps
 {% endif %}
 
 {% if salt['pillar.get']('gitlab:use_rvm', False) %}
