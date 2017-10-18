@@ -1,15 +1,14 @@
 # GitLab logrotate settings
 # based on: http://stackoverflow.com/a/4883967
 
-{% set root_dir = salt['pillar.get']('gitlab:lookup:root_dir', '/home/git') %}
-{% set logs_dir = salt['pillar.get']('gitlab:lookup:logs_dir', root_dir ~ '/var/logs') %}
+{%- set root_dir = salt['pillar.get']('gitlab:lookup:root_dir', '/home/git') %}
+{%- set logs_dir = salt['pillar.get']('gitlab:lookup:logs_dir', root_dir ~ '/var/logs') %}
 
 {{ logs_dir }}/*.log {
-    weekly
+    daily
     missingok
-    rotate 52
+    rotate 90
     compress
-    delaycompress
     notifempty
     copytruncate
 }
