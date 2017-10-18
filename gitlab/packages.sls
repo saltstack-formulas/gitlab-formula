@@ -8,6 +8,8 @@ gitlab-golang-deps:
     {%- if grains.os == "Ubuntu" and grains.osrelease_info[0] < 17 %}
     - fromrepo: artful
     {%- endif %}
+    - require:
+      - pkgrepo: gitlab-distro-backports
 {%- endif %}
 
 gitlab-deps:
@@ -113,6 +115,8 @@ gitlab-deps:
       - libpq-dev
       {% endif %}
     - require:
+      - pkgrepo: gitlab-nodejs-repo
+      - pkgrepo: gitlab-yarn-repo
       - pkg: gitlab-golang-deps
 {% endif %}
 
