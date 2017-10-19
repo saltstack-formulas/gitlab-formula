@@ -63,6 +63,11 @@ gitaly-make:
     - name: make build install DESTDIR={{ root_dir }}/gitaly PREFIX=
     - user: git
     - cwd: {{ gitaly_dir_content }}
+    - env:
+      {%- if salt['pillar.get']('gitlab:proxy:address') %}
+      - HTTP_PROXY: {{ pillar.gitlab.proxy.address }}
+      - HTTPS_PROXY: {{ pillar.gitlab.proxy.address }}
+      {%- endif %}
     - onchanges:
       - gitaly-fetcher
     - require:
