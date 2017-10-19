@@ -1,4 +1,5 @@
 {%- set root_dir = salt['pillar.get']('gitlab:lookup:root_dir', '/home/git') %}
+{%- set repositories = salt['pillar.get']('gitlab:lookup:repositories', root_dir ~ '/repositories') %}
 {%- set sockets_dir = salt['pillar.get']('gitlab:lookup:sockets_dir', root_dir ~ '/var/sockets') %}
 {%- set lib_dir = salt['pillar.get']('gitlab:lookup:lib_dir', root_dir ~ '/libraries') %}
 
@@ -83,6 +84,11 @@ gitaly-config:
     - user: git
     - group: git
     - mode: 644
+    - context:
+        root_dir: {{ root_dir }}
+        sockets_dir: {{ sockets_dir }}
+        repositories: {{ repositories }}
+        gitaly_dir_content: {{ gitaly_dir_content }}
     - require:
       - gitaly-fetcher
       - file: gitaly-bin-dir
