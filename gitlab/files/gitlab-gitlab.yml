@@ -554,7 +554,7 @@ production: &base
   ## GitLab Shell settings
   gitlab_shell:
     path: {{ root_dir }}/gitlab-shell/
-    hooks_path: {{ shell_dir_content }}/hooks/
+    hooks_path: {{ root_dir }}/gitlab-shell/hooks/
 
     # File that contains the secret key for verifying access for gitlab-shell.
     # Default is '.gitlab_shell_secret' relative to Rails.root (i.e. root of the GitLab app).
