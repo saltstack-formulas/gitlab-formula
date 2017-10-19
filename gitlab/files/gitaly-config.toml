@@ -13,6 +13,10 @@ socket_path = "{{ sockets_dir }}/private/gitaly.socket"
 # prometheus_listen_addr = "localhost:9236"
 #
 
+# # Git executable settings
+# [git]
+# bin_path = "/usr/bin/git"
+
 [[storage]]
 name = "default"
 path = "{{ repositories }}"

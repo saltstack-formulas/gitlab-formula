@@ -245,7 +245,8 @@ production: &base
   # ==========================
 
   ## LDAP settings
-  # You can inspect a sample of the LDAP users with login access by running:
+  # You can test connections and inspect a sample of the LDAP users with login
+  # access by running:
   #   bundle exec rake gitlab:ldap:check RAILS_ENV=production
   ldap:
     enabled: {{ salt['pillar.get']('gitlab:ldap:enabled', false) }}
@@ -268,17 +269,48 @@ production: &base
         # Example: 'Paris' or 'Acme, Ltd.'
         label: {{ salt['pillar.get']('gitlab:ldap:label', 'LDAP') }}
 
+        # Example: 'ldap.mydomain.com'
         host: '{{ salt['pillar.get']('gitlab:ldap:host', '') }}'
         port: {{ salt['pillar.get']('gitlab:ldap:port', 636) }}
         uid: '{{ salt['pillar.get']('gitlab:ldap:uid', 'sAMAccountName') }}'
-        method: '{{ salt['pillar.get']('gitlab:ldap:method', 'ssl') }}' # "tls" or "ssl" or "plain"
+
+        # Examples: 'america\\momo' or 'CN=Gitlab Git,CN=Users,DC=mydomain,DC=com'
         bind_dn: '{{ salt['pillar.get']('gitlab:ldap:bind_dn', '') }}'
         password: '{{ salt['pillar.get']('gitlab:ldap:password', '') }}'
+
+        # Encryption method. The "method" key is deprecated in favor of
+        # "encryption".
+        #
+        #   Examples: "start_tls" or "simple_tls" or "plain"
+        #
+        #   Deprecated values: "tls" was replaced with "start_tls" and "ssl" was
+        #   replaced with "simple_tls".
+        #
+        encryption: {{ salt['pillar.get']('gitlab:ldap:encryption', 'plain') }}
+
+        # Enables SSL certificate verification if encryption method is
+        # "start_tls" or "simple_tls". (Defaults to false for backward-
+        # compatibility)
+        verify_certificates: {{ salt['pillar.get']('gitlab:ldap:verify_certificates', false) }}
+
+        # Specifies the path to a file containing a PEM-format CA certificate,
+        # e.g. if you need to use an internal CA.
+        #
+        #   Example: '/etc/ca.pem'
+        #
+        ca_file: {{ salt['pillar.get']('gitlab:ldap:ca_file', '') }}
+
+        # Specifies the SSL version for OpenSSL to use, if the OpenSSL default
+        # is not appropriate.
+        #
+        #   Example: 'TLSv1_1'
+        #
+        ssl_version: {{ salt['pillar.get']('gitlab:ldap:ssl_version', '') }}
 
         # Set a timeout, in seconds, for LDAP queries. This helps avoid blocking
         # a request if the LDAP server becomes unresponsive.
         # A value of 0 means there is no timeout.
-        timeout: 10
+        timeout: {{ salt['pillar.get']('gitlab:ldap:timeout', 10) }}
 
         # This setting specifies if LDAP server is Active Directory LDAP server.
         # For non AD servers it skips the AD specific queries.
@@ -303,16 +335,19 @@ production: &base
 
         # Base where we can search for users
         #
-        #   Ex. ou=People,dc=gitlab,dc=example
+        #   Ex. 'ou=People,dc=gitlab,dc=example' or 'DC=mydomain,DC=com'
         #
         base: {{ salt['pillar.get']('gitlab:ldap:base', '') }}
 
         # Filter LDAP users
         #
-        #   Format: RFC 4515 http://tools.ietf.org/search/rfc4515
+        #   Format: RFC 4515 https://tools.ietf.org/search/rfc4515
         #   Ex. (employeeType=developer)
         #
         #   Note: GitLab does not support omniauth-ldap's custom filter syntax.
+        #
+        #   Example for getting only specific users:
+        #   '(&(objectclass=user)(|(samaccountname=momo)(samaccountname=toto)))'
         #
         user_filter: {{ salt['pillar.get']('gitlab:ldap:user_filter', '') }}
 
@@ -467,10 +502,10 @@ production: &base
 
   # Gitaly settings
   gitaly:
-    # This setting controls whether GitLab uses Gitaly (new component
-    # introduced in 9.0). Eventually Gitaly use will become mandatory and
-    # this option will disappear.
-    enabled: true
+    # Default Gitaly authentication token. Can be overriden per storage. Can
+    # be left blank when Gitaly is running locally on a Unix socket, which
+    # is the normal way to deploy Gitaly.
+    token:
 
   #
   # 4. Advanced settings
@@ -486,6 +521,7 @@ production: &base
       default:
         path: {{ repositories }}
         gitaly_address: unix:{{ sockets_dir }}/private/gitaly.socket # TCP connections are supported too (e.g. tcp://host:port)
+        # gitaly_token: 'special token' # Optional: override global gitaly.token for this storage.
 
   ## Backup settings
   backup:
@@ -555,6 +591,15 @@ production: &base
     #   enabled: true
     #   host: localhost
     #   port: 3808
+
+  ## Monitoring
+  # Built in monitoring settings
+  monitoring:
+    # Time between sampling of unicorn socket metrics, in seconds
+    # unicorn_sampler_interval: 10
+    # IP whitelist to access monitoring endpoints
+    ip_whitelist:
+      - 127.0.0.0/8
 
   #
   # 5. Extra customization
