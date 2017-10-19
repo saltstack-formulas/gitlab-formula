@@ -96,6 +96,17 @@ gitlab-db-config:
     {% endif %}
       - user: git-user
 
+gitlab-redis-config:
+  file.managed:
+    - name: {{ root_dir }}/gitlab/config/resque.yml
+    - source: salt://gitlab/files/gitlab-resque.yml
+    - template: jinja
+    - user: git
+    - group: git
+    - mode: 640
+    - require:
+      - user: git-user
+
 gitlab-db-secrets:
   file.managed:
     - name: {{ root_dir }}/gitlab/config/secrets.yml
@@ -244,6 +255,7 @@ gitlab-migrate-db:
     {% endif %}
     - require:
       - file: gitlab-db-config
+      - file: gitlab-redis-config
       - cmd: gitlab-gems
 
 gitlab-build-translations:
