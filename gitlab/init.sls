@@ -9,4 +9,5 @@ include:
   - gitlab.ruby
   - gitlab.gitlab-shell
   - gitlab.gitlab-workhorse
+  - gitlab.gitaly
   - gitlab.gitlab

@@ -24,6 +24,7 @@
 {% set root_dir = salt['pillar.get']('gitlab:lookup:root_dir', '/home/git') %}
 {% set lib_dir = salt['pillar.get']('gitlab:lookup:lib_dir', root_dir ~ '/libraries') %}
 {% set repositories = salt['pillar.get']('gitlab:lookup:repositories', root_dir ~ '/repositories') %}
+{% set sockets_dir = salt['pillar.get']('gitlab:lookup:sockets_dir', root_dir ~ '/var/sockets') %}
 
 {% set shell_dir = lib_dir ~ "/gitlab-shell" %}
 {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
@@ -469,7 +470,7 @@ production: &base
     # This setting controls whether GitLab uses Gitaly (new component
     # introduced in 9.0). Eventually Gitaly use will become mandatory and
     # this option will disappear.
-    enabled: false
+    enabled: true
 
   #
   # 4. Advanced settings
@@ -484,7 +485,7 @@ production: &base
     storages: # You must have at least a `default` storage path.
       default:
         path: {{ repositories }}
-        gitaly_address: unix:{{ root_dir }}/gitlab/tmp/sockets/private/gitaly.socket # TCP connections are supported too (e.g. tcp://host:port)
+        gitaly_address: unix:{{ sockets_dir }}/private/gitaly.socket # TCP connections are supported too (e.g. tcp://host:port)
 
   ## Backup settings
   backup:

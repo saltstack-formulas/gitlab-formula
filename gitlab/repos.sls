@@ -9,31 +9,29 @@ PUIAS_6_computational:
 
 {% elif grains['os_family'] == 'Debian' %}
 {# TODO: Handling of packages should be moved to map.jinja #}
-{# Gitlab 9.2+ requires golang-1.8+ which requires backports on Debian 9 and Ubuntu 16.04 #}
+{# Gitlab 9.2+ requires golang-1.8+ which requires backports on Debian 9 and Artful repositories on Ubuntu #}
 {%- set distro = grains.oscodename %}
 gitlab-distro-backports:
   file.managed:
     - name: /etc/apt/preferences.d/55_gitlab_req_backports
-    {%- if grains.os == "Ubuntu" %}
+    {%- if grains.os == "Ubuntu" and grains.osrelease_info[0] < 17 %}
     - contents: |
         Package: golang
-        Pin: release o=Ubuntu,a={{ distro }}-backports
-        Pin-Priority: 800
+        Pin: release o=Ubuntu,a=artful
+        Pin-Priority: 901
     {%- else %}
     - contents: |
         Package: golang
         Pin: release o=Debian Backports,a={{ distro }}-backports
-        Pin-Priority: 800
+        Pin-Priority: 901
     {%- endif %}
   pkgrepo.managed:
-    {%- if grains.os == "Ubuntu" %}
-    - name: deb http://archive.ubuntu.com/ubuntu {{ distro }}-backports main
+    {%- if grains.os == "Ubuntu" and grains.osrelease_info[0] < 17 %}
+    - name: deb http://archive.ubuntu.com/ubuntu artful main
     {%- else %}
     - name: deb http://httpredir.debian.org/debian {{ distro }}-backports main
     {%- endif %}
     - file: /etc/apt/sources.list.d/gitlab_req_backports.list
-    - require_in:
-      - sls: gitlab.packages
 
 {# Gitlab 8.17+ requires nodejs-4.3+ but is not available before Debian 9 or Ubuntu 16.10 #}
 gitlab-nodejs-repo-mgmt-pkgs:
@@ -58,14 +56,10 @@ gitlab-nodejs-preference:
         Package: nodejs
         Pin: release o=Node source,l=Node source
         Pin-Priority: 901
-    - require_in:
-      - sls: gitlab.packages
 
 gitlab-yarn-repo:
   pkgrepo.managed:
     - name: deb https://dl.yarnpkg.com/debian/ stable main
     - file: /etc/apt/sources.list.d/yarn.list
     - key_url: salt://gitlab/files/dl.yarn.com.key
-    - require_in:
-      - sls: gitlab.packages
 {% endif %}

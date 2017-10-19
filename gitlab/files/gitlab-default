@@ -96,7 +96,7 @@ mail_room_pid_path="$pid_path/mail_room.pid"
 shell_path="/bin/bash"
 
 # This variable controls whether the init script starts/stops Gitaly
-gitaly_enabled=false
-gitaly_log="{{ logs_dir }}/gitaly.log"
+gitaly_enabled=true
+gitaly_dir=$(cd {{ root_dir }}/gitaly/bin && pwd)
 gitaly_pid_path="$pid_path/gitaly.pid"
-gitaly_log="{{ logs_dir }}/log/gitaly.log"
+gitaly_log="{{ logs_dir }}/gitaly.log"
