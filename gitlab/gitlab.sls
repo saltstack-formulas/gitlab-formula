@@ -283,6 +283,7 @@ gitlab-yarn-install:
       - RAILS_ENV: production
       - NODE_ENV: production
       {%- if salt['pillar.get']('gitlab:proxy:address') %}
+      - YARN_PROXY: {{ pillar.gitlab.proxy.address }}
       - HTTP_PROXY: {{ pillar.gitlab.proxy.address }}
       - HTTPS_PROXY: {{ pillar.gitlab.proxy.address }}
       {%- endif %}
