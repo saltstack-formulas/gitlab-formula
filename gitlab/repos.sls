@@ -7,14 +7,6 @@ PUIAS_6_computational:
     - gpgkey: http://springdale.math.ias.edu/data/puias/6/x86_64/os/RPM-GPG-KEY-puias
     - mirrorlist: http://puias.math.ias.edu/data/puias/computational/$releasever/$basearch/mirrorlist
 
-{% elif grains['os_family'] == 'Debian' %}
-
-gitlab-runner repo:
-  pkgrepo.managed:
-    - humanname: gitlab-runner debian repo
-    - file: /etc/apt/sources.list.d/gitlab-runner.list
-    - name: deb https://packages.gitlab.com/runner/gitlab-runner/{{ grains['os']|lower }}/ {{ grains['oscodename'] }} main
-    - key_url: https://packages.gitlab.com/runner/gitlab-runner/gpgkey
 
 
 {% if not salt['pillar.get']('gilab:use_rvm', false) %}

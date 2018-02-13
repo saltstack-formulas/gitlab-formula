@@ -2,10 +2,23 @@
 #
 {% from "gitlab/map.jinja" import gitlab with context %}
 
+{% if grains['os_family'] == 'Debian' %}
+gitlab-runner repo:
+  pkgrepo.managed:
+    - humanname: gitlab-runner debian repo
+    - file: /etc/apt/sources.list.d/gitlab-runner.list
+    - name: deb https://packages.gitlab.com/runner/gitlab-runner/{{ grains['os']|lower }}/ {{ grains['oscodename'] }} main
+    - key_url: https://packages.gitlab.com/runner/gitlab-runner/gpgkey
+
+gitlab-install_pkg:
+  pkg.installed:
+    - name: gitlab-runner
+{% else %}
 gitlab-install_pkg:
   pkg.installed:
     - sources:
-      - gitlab-runner: {{gitlab.runner.downloadpath}} 
+      - gitlab-runner: {{gitlab.runner.downloadpath}}
+{% endif %}
 
 gitlab-create_group:
   group.present:
