@@ -55,9 +55,8 @@ gitlab:
 
 #runner
   runner:
-    downloadpath: "https://s3-eu-west-1.amazonaws.com/downloads-packages/ubuntu-14.04/gitlab-runner_5.2.0~omnibus.1-1_amd64.deb"
-    #(default debian wget https://s3-eu-west-1.amazonaws.com/downloads-packages/ubuntu-14.04/gitlab-runner_5.2.0~omnibus.1-1_amd64.deb )
+    downloadpath: "https://packages.gitlab.com/runner/gitlab-runner/packages/linuxmint/sonya/gitlab-runner_10.4.0_{{ grains['osarch'] }}.deb/download"
     username: "gitlab-runner"
     # default: gitlab-runner
-    url: "url gitlab-ci"
-    token: "token gitlab-ci"
+    url: "url gitlab-ci" # MANDATORY
+    token: "token gitlab-ci" # MANDATORY
