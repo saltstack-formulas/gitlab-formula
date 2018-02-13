@@ -39,7 +39,7 @@ gitlab-install_runserver_create_user:
 
 gitlab-install_runserver3:
   cmd.run:
-    - name: "export CI_SERVER_URL='{{gitlab.runner.url}}'; export REGISTRATION_TOKEN='{{gitlab.runner.token}}'; /opt/gitlab-runner/bin/setup -C /home/{{gitlab.runner.username}};"
+    - name: "CI_SERVER_URL='{{gitlab.runner.url}}' REGISTRATION_TOKEN='{{gitlab.runner.token}}' /usr/bin/gitlab-runner  register --config /home/{{gitlab.runner.username}}/config.yml"
     - unless: 'test -e /home/{{gitlab.runner.username}}/config.yml'
     - require:
       - user: gitlab-install_runserver_create_user
