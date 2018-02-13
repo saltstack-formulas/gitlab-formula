@@ -44,20 +44,9 @@ gitlab-install_runserver3:
     - require:
       - user: gitlab-install_runserver_create_user
 
-gitlab-create_init_file:
-  file.copy:
-    - name: "/etc/init/gitlab-runner.conf"
-    - source: "/opt/gitlab-runner/doc/install/upstart/gitlab-runner.conf"
-    - user: "root"
-    - group: "root"
-    - mode: 775
-    - unless: 'test -e /etc/init/gitlab-runner.conf'
-    - force: True
-    - require:
-      - cmd: gitlab-install_runserver3
-
 gitlab-runner:
   service.running:
     - enable: True
     - require:
-      - file: gitlab-create_init_file
+      - pkg: gitlab-install_pkg
+      - cmd: gitlab-install_runserver3
