@@ -174,7 +174,7 @@ git-var-mkdir:
     - mode: 750
 
 # pids_dir
-{% for dir in [ sockets_dir, logs_dir, uploads_dir ] %}
+{% for dir in [ sockets_dir, logs_dir ] %}
 git-{{ dir }}-mkdir:
   file.directory:
     - name: {{ dir }}
@@ -183,9 +183,11 @@ git-{{ dir }}-mkdir:
     - mode: 750
 {% endfor %}
 
-gitlab-uploads_dir-mode:
+gitlab-uploads_dir-mkdir:
   file.directory:
     - name: {{ uploads_dir }}
+    - user: git
+    - group: git
     - mode: 700
 
 # Hardcoded in gitlab, so, we have to create symlink
