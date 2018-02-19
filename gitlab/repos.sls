@@ -33,7 +33,7 @@ gitlab-distro-backports:
     {%- endif %}
     - file: /etc/apt/sources.list.d/gitlab_req_backports.list
 
-{# Gitlab 8.17+ requires nodejs-4.3+ but is not available before Debian 9 or Ubuntu 16.10 #}
+{# Gitlab 10.3+ requires nodejs-6+ but is not available in Debian 10 and not before Ubuntu 17.10 #}
 gitlab-nodejs-repo-mgmt-pkgs:
   pkg.installed:
     - names:
@@ -45,8 +45,8 @@ gitlab-nodejs-repo-mgmt-pkgs:
 
 gitlab-nodejs-repo:
   pkgrepo.managed:
-    - name: deb https://deb.nodesource.com/node_4.x {{ grains.oscodename|lower }} main
-    - file: /etc/apt/sources.list.d/nodesource_4.list
+    - name: deb https://deb.nodesource.com/node_6.x {{ grains.oscodename|lower }} main
+    - file: /etc/apt/sources.list.d/nodesource_6.list
     - key_url: salt://gitlab/files/nodesource.gpg.key
 
 gitlab-nodejs-preference:

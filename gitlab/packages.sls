@@ -103,7 +103,7 @@ gitlab-deps:
       - libyaml-dev
       - logrotate
       - openssh-server
-      - nodejs: ">=4.3"
+      - nodejs: ">=6"
       - pkg-config
       - python
       - python-docutils
