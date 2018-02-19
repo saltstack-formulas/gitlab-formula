@@ -190,6 +190,14 @@ gitlab-uploads_dir-mkdir:
     - group: git
     - mode: 700
 
+gitlab-uploads_dir-symlink:
+  file.symlink:
+    - name: {{ gitlab_dir }}/public/uploads
+    - target: {{ uploads_dir }}
+    - require:
+      - file: gitlab-config
+      - file: gitlab-uploads_dir-mkdir
+
 # Hardcoded in gitlab, so, we have to create symlink
 gitlab-pids_dir-symlink:
   file.symlink:
@@ -354,13 +362,6 @@ gitlab-respositories-dir:
     - file_mode: 0660
     - dir_mode: 2770
 
-gitlab-uploads-symlink:
-  file.symlink:
-    - name: {{ gitlab_dir }}/public/uploads
-    - target: {{ uploads_dir }}
-    - require:
-      - file: git-var-mkdir
-
 gitlab-service:
   file.managed:
     - name: /etc/init.d/gitlab
@@ -381,7 +382,8 @@ gitlab-service:
     - require:
       - file: gitlab-service
 #      - cmd: gitlab-initialize
-      - file: gitlab-pids_dir-symlink      
+      - file: gitlab-pids_dir-symlink
+      - file: gitlab-uploads_dir-symlink
     - watch:
     {% if salt['pillar.get']('gitlab:archives:enabled', false) %}
       - archive: gitlab-fetcher
