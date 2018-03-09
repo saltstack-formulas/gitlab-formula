@@ -103,13 +103,13 @@ gitlab-deps:
       - libyaml-dev
       - logrotate
       - openssh-server
-      - nodejs: ">=4.3"
+      - nodejs: latest
       - pkg-config
       - python
       - python-docutils
       - rake
       - redis-server
-      - yarn: ">=0.17"
+      - yarn: latest
       - zlib1g-dev
       {% if salt['pillar.get']('gitlab:db:engine', 'postgresql') == 'postgresql' %}
       - libpq-dev
