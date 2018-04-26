@@ -1,12 +1,56 @@
 gitlab:
+  lookup:
+    root_dir: /opt/git
+    lib_dir: /opt/git/libraries
+    repo_dir: /opt/git/repositories
+    pids_dir: /opt/git/var/pids
+    sockets_dir: /opt/git/var/sockets
+    logs_dir: /opt/git/var/logs
+    uploads_dir: /opt/git/var/uploads
+  hostname: localhost
+  proxy:
+    enabled: false
+    address: http://ourproxy:port
+  archives:
+    enabled: false
+    sources:
+      gitlab:
+        source: https://gitlab.com/gitlab-org/gitlab-ce/repository/archive.tar.gz?ref=v8.7.2
+        md5: 0a63803fd87766d034cf3ff4d4133fce
+        content: gitlab-ce-v8.7.2-213974bc9bfca79136db32d47f4854b02e0e7fc2
+      workhorse:
+        source: https://gitlab.com/gitlab-org/gitlab-workhorse/repository/archive.tar.gz?ref=0.7.2
+        md5: c0b266285bf54ed7cef806f25a7e8aa9
+        content: gitlab-workhorse-0.7.2-7a2c97cb8f98a2af9b8ec80fcafc2721ef4a8e97
+      shell:
+        source: https://gitlab.com/gitlab-org/gitlab-shell/repository/archive.tar.gz?ref=v2.7.2
+        md5: 1835e858d9285ac9941eec320e2ecac6
+        content: gitlab-shell-v2.7.2-c615ca4650dfb4b17bf073276024f886e52b74a3
   use_rvm: False
-  rvm_ruby: 2.1.0
-  shell_version: v1.8.0
-  gitlab_version: 6-5-stable
-  db_engine: postgresql
-  db_name: 'gitlabhq_production'
-  db_user: 'git'
-  db_pass: 'MyVerySecretGitLabPassword'
+  rvm_ruby: 2.3.3
+  shell_version: v2.7.2
+  gitlab_version: 8-7-stable
+  workhorse_version: v0.7.1
+  databases:
+    production: &production
+      engine: postgresql
+      name: gitlab
+      pool: 10
+      host: localhost
+      secrets:
+        db_key_base:
+        secret_key_base:
+        otp_key_base:
+    development:
+      engine: postgresql
+      name: gitlab
+    staging:
+      engine: postgresql
+      name: gitlab
+    test:
+      engine: postgresql
+      name: gitlab
+  active_database: *production
   gravatar:
     enabled: false
   ldap:
@@ -39,25 +83,24 @@ gitlab:
     #{% elif grains['os_family'] == 'Debian' %}
     #ca_path: /etc/ssl/certs
     #{% endif %}
+    secret:
+      value: 0123456789abcdef0123456789abcde
+      path: "/opt/git/.gitlab_shell_secret"
+  workhorse
+    secret:
+      value: 0123456789abcdef0123456789zyxwvu
+      path: "/opt/git/.gitlab_workhorse_secret"
 
   unicorn:
     worker_processes: 2
     timeout: 30
-  https: True
-  ssl_key: |
-    -----BEGIN PRIVATE KEY-----
-    ABC=
-    -----END PRIVATE KEY-----
-  ssl_cert: |
-    -----BEGIN CERTIFICATE-----
-    ABC=
-    -----END CERTIFICATE-----
+  https: false
 
 #runner
-  runner:
-    downloadpath: "https://s3-eu-west-1.amazonaws.com/downloads-packages/ubuntu-14.04/gitlab-runner_5.2.0~omnibus.1-1_amd64.deb"
-    #(default debian wget https://s3-eu-west-1.amazonaws.com/downloads-packages/ubuntu-14.04/gitlab-runner_5.2.0~omnibus.1-1_amd64.deb )
-    username: "gitlab-runner"
-    # default: gitlab-runner
-    url: "url gitlab-ci"
-    token: "token gitlab-ci"
+#  runner:
+#    downloadpath: "https://s3-eu-west-1.amazonaws.com/downloads-packages/ubuntu-14.04/gitlab-runner_5.2.0~omnibus.1-1_amd64.deb"
+#    #(default debian wget https://s3-eu-west-1.amazonaws.com/downloads-packages/ubuntu-14.04/gitlab-runner_5.2.0~omnibus.1-1_amd64.deb )
+#    username: "gitlab-runner"
+#    # default: gitlab-runner
+#    url: "url gitlab-ci"
+#    token: "token gitlab-ci"

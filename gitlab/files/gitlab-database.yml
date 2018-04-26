@@ -1,50 +1,18 @@
-#
-# PRODUCTION
-#
-production:
-  adapter: postgresql
-  encoding: unicode
-  database: {{ salt['pillar.get']('gitlab:db_name') }}
-  pool: 10
-  username: {{ salt['pillar.get']('gitlab:db_user') }}
-  password: {{ salt['pillar.get']('gitlab:db_pass') }}
-  # host: localhost
-  # port: 5432 
-  # socket: /tmp/postgresql.sock
+{%- set db_name = salt['pillar.get']('gitlab:db:name') %}
+{%- set db_user = salt['pillar.get']('postgres:databases:' ~ db_name ~ ':owner') %}
+{%- set db_pass = salt['pillar.get']('postgres:users:' ~ db_user ~ ':password') %}
 
-#
-# Development specific
-#
-development:
-  adapter: postgresql
-  encoding: unicode
-  database: gitlabhq_development
-  pool: 5
-  username: postgres
-  password:
-  # socket: /tmp/postgresql.sock
+{%- for name, infos in salt['pillar.get']('gitlab:databases', {}).items() %}
+{%- set db_user = salt['pillar.get']('postgres:databases:' ~ infos['name'] ~ ':owner') %}
+{{ name }}:
+  adapter:  {{ infos['engine'] }}
+  database: {{ infos['name'] }}
+  username: {{ db_user }}
+  password: {{ salt['pillar.get']('postgres:users:' ~ db_user ~ ':password') }}
+  encoding: {% if 'encoding' in infos %}{{ infos['encoding'] }}{% else %}unicode{% endif %}
+  pool:     {% if 'pool' in infos %}{{ infos['pool'] }}{% else %}5{% endif %}
+{%- if 'host' in infos %}
+  host:     {{ infos['host'] }}
+{% endif %}
 
-#
-# Staging specific
-#
-staging:
-  adapter: postgresql
-  encoding: unicode
-  database: gitlabhq_staging
-  pool: 5
-  username: postgres
-  password:
-  # socket: /tmp/postgresql.sock
-
-# Warning: The database defined as "test" will be erased and
-# re-generated from your development database when you run "rake".
-# Do not set this db to the same as development or production.
-test: &test
-  adapter: postgresql
-  encoding: unicode
-  database: gitlabhq_test
-  pool: 5
-  username: postgres
-  password:
-  # socket: /tmp/postgresql.sock
-
+{%- endfor %}

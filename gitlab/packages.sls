@@ -1,5 +1,16 @@
-include:
-  - git
+{%- if grains.os_family == 'Debian' %}
+# aptpkg does not deal with >= versions
+gitlab-golang-deps:
+  pkg.installed:
+    - pkgs:
+      - golang
+      - golang-1.8
+    {%- if grains.os == "Ubuntu" and grains.osrelease_info[0] < 17 %}
+    - fromrepo: artful
+    {%- endif %}
+    - require:
+      - pkgrepo: gitlab-distro-backports
+{%- endif %}
 
 gitlab-deps:
   pkg.installed:
@@ -74,25 +85,39 @@ gitlab-deps:
       - build-essential
       - checkinstall
       - curl
+      - cmake
       - libcurl4-openssl-dev
       - libffi-dev
       - libgdbm-dev
       - libicu-dev
       - libncurses5-dev
+      - libre2-dev
       - libreadline-dev
+      {%- if (grains['os'] == 'Ubuntu' and grains['osrelease_info'][0] >= 17) or (grains['os'] == 'Debian' and grains['osrelease_info'][0] >= 9) %}
+      - libssl1.0-dev
+      {%- else %}
       - libssl-dev
+      {%- endif %}
       - libxml2-dev
       - libxslt1-dev
       - libyaml-dev
       - logrotate
       - openssh-server
+      - nodejs: latest
+      - pkg-config
       - python
       - python-docutils
+      - rake
       - redis-server
+      - yarn: latest
       - zlib1g-dev
-      {% if salt['pillar.get']('gitlab:db_engine', 'postgresql') == 'postgresql' %}
+      {% if salt['pillar.get']('gitlab:db:engine', 'postgresql') == 'postgresql' %}
       - libpq-dev
       {% endif %}
+    - require:
+      - pkgrepo: gitlab-nodejs-repo
+      - pkgrepo: gitlab-yarn-repo
+      - pkg: gitlab-golang-deps
 {% endif %}
 
 {% if salt['pillar.get']('gitlab:use_rvm', False) %}
