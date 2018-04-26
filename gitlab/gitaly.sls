@@ -59,6 +59,15 @@ gitaly-bin-dir:
     - group: git
     - mode: 750
 
+{% if pillar.gitlab.nokogiri_system_libs|default(False) %}
+gitaly-bundle-config:
+  cmd.run:
+    - name: bundle config build.nokogiri --use-system-libraries --with-xml2-config=/usr/bin/xml2-config --with-xslt-config=/usr/bin/xslt-config
+    - user: git
+    - cwd: {{ gitaly_dir_content }}
+    - onlyif: bundle config build.nokogiri |grep -q "not configured"
+{% endif %}
+
 gitaly-make:
   cmd.run:
     - name: make build install DESTDIR={{ root_dir }}/gitaly PREFIX=
@@ -72,6 +81,9 @@ gitaly-make:
     - onchanges:
       - gitaly-fetcher
     - require:
+      {% if pillar.gitlab.nokogiri_system_libs|default(False) %}
+      - cmd: gitaly-bundle-config
+      {% endif %}
       - file: gitaly-bin-dir
 
 # https://gitlab.com/gitlab-org/gitaly/blob/master/config.toml.example
