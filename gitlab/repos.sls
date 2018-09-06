@@ -7,6 +7,8 @@ PUIAS_6_computational:
     - gpgkey: http://springdale.math.ias.edu/data/puias/6/x86_64/os/RPM-GPG-KEY-puias
     - mirrorlist: http://puias.math.ias.edu/data/puias/computational/$releasever/$basearch/mirrorlist
 
+
+
 {% if not salt['pillar.get']('gilab:use_rvm', false) %}
 include:
   - gitlab.ruby
