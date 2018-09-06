@@ -31,7 +31,7 @@ gitlab-install_runserver_create_user:
   user.present:
     - name: {{gitlab.runner.username}}
     - shell: /bin/false
-    - home: /home/{{gitlab.runner.username}}
+    - home: {{gitlab.runner.home}}
     - groups:
       - gitlab-runner
     - require:
@@ -40,7 +40,7 @@ gitlab-install_runserver_create_user:
 gitlab-install_runserver3:
   cmd.run:
     - name: "CI_SERVER_URL='{{gitlab.runner.url}}' REGISTRATION_TOKEN='{{gitlab.runner.token}}' /usr/bin/gitlab-runner  register --non-interactive"
-    - unless: 'test -e /home/{{gitlab.runner.username}}/config.yml'
+    - unless: 'test -e /home/{{gitlab.runner.home}}/config.yml'
     - require:
       - user: gitlab-install_runserver_create_user
 
