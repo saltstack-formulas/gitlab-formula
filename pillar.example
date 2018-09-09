@@ -60,3 +60,4 @@ gitlab:
     # default: gitlab-runner
     url: "url gitlab-ci" # MANDATORY
     token: "token gitlab-ci" # MANDATORY
+    home: /home/gitlab-runner
