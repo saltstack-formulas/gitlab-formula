@@ -61,3 +61,4 @@ gitlab:
     url: "url gitlab-ci" # MANDATORY
     token: "token gitlab-ci" # MANDATORY
     home: /home/gitlab-runner
+    executor: shell
