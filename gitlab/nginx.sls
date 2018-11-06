@@ -7,7 +7,10 @@
 {% endif %}
 
 install_nginx_gitlab:
-  pkg.installed: []
+  pkg.installed: 
+    - name: nginx
+
+ensure_nginx_service_running:
   service.running:
     - enable: True
     - require:
@@ -15,8 +18,12 @@ install_nginx_gitlab:
       - user: nginx
     - watch:
       - file: gitlab-nginx
+  
+Remove_default_nginx_file:  
   file.absent:
     - name: {{ nginx_path }}/default.conf
+  
+Create_nginx_user:  
   user.present:
     - name: {{ nginx_user }}
     - groups:
