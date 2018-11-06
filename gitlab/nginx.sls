@@ -6,7 +6,7 @@
 {% set nginx_path = '/etc/nginx/conf.d' %}
 {% endif %}
 
-nginx:
+install_nginx_gitlab:
   pkg.installed: []
   service.running:
     - enable: True
