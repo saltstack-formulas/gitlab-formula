@@ -9,6 +9,8 @@ gitlab-runner repo:
     - file: /etc/apt/sources.list.d/gitlab-runner.list
     - name: deb https://packages.gitlab.com/runner/gitlab-runner/{{ grains['os']|lower }}/ {{ grains['oscodename'] }} main
     - key_url: https://packages.gitlab.com/runner/gitlab-runner/gpgkey
+    - require_in:
+      - pkg: gitlab-install_pkg
 
 gitlab-install_pkg:
   pkg.installed:
