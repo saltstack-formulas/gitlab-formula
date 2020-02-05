@@ -41,7 +41,7 @@ gitlab-install_runserver_create_user:
 
 gitlab-install_runserver3:
   cmd.run:
-    - name: "CI_SERVER_URL='{{gitlab.runner.url}}' REGISTRATION_TOKEN='{{gitlab.runner.token}}' RUNNER_EXECUTOR='{{gitlab.runner.executor}}' /usr/bin/gitlab-runner  register --non-interactive"
+    - name: "CI_SERVER_URL='{{gitlab.runner.url}}' REGISTRATION_TOKEN='{{gitlab.runner.token}}' RUNNER_EXECUTOR='{{gitlab.runner.executor}}' RUNNER_ENV='{{gitlab.runner.env}}' DOCKER_IMAGE='{{gitlab.runner.image}}' DOCKER_PRIVILEGED='{{gitlab.runner.privileged}}' RUNNER_TAG_LIST='{{gitlab.runner.tags}}' /usr/bin/gitlab-runner  register --non-interactive"
     - creates: /etc/gitlab-runner/config.toml
     - require:
       - user: gitlab-install_runserver_create_user

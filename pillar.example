@@ -61,4 +61,8 @@ gitlab:
     url: "url gitlab-ci" # MANDATORY
     token: "token gitlab-ci" # MANDATORY
     home: /home/gitlab-runner
-    executor: shell
+    executor: docker
+    env: DOCKER_TLS_CERTDIR=
+    image: alpine:latest
+    privileged: true
+    tags: docker,shared
