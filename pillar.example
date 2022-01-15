@@ -62,3 +62,4 @@ gitlab:
     token: "token gitlab-ci" # MANDATORY
     home: /home/gitlab-runner
     executor: shell
+    docker_network_mode: host
