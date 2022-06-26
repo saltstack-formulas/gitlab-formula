@@ -5,6 +5,7 @@
       'username': 'gitlab-runner',
       'home': '/home/gitlab-runner',
       'executor': 'shell',
+      'dockerimage': 'docker',
     }
   },
   'default': {
@@ -13,6 +14,7 @@
       'downloadpath': 'https://packages.gitlab.com/runner/gitlab-runner/packages/linuxmint/sonya/gitlab-runner_10.4.0_amd64.deb/download',
       'home': '/home/gitlab-runner',
       'executor': 'shell',
+      'dockerimage': 'docker',
     }
   },
 }, merge=salt['pillar.get']('gitlab')) %}
